@@ -1,2 +1,2 @@
 # nvisibl
-A crowd-friendly chat application which allows keeps your private chats private.
+A crowd-friendly chat application which keeps your private chats private.
