@@ -33,6 +33,7 @@ namespace Nvisibl.Cloud
             services.AddTransient<IUnitOfWorkFactory, UnitOfWorkFactory>();
             services.AddTransient<IUserManagerService, UserManagerService>();
             services.AddTransient<IChatroomManagerService, ChatroomManagerService>();
+            services.AddTransient<IMessagesManagerService, MessagesManagerService>();
             services.AddControllers();
         }
 

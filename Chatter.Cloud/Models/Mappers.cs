@@ -64,5 +64,37 @@ namespace Nvisibl.Cloud.Models
                 Users = users.Select(ToUserModel).ToList(),
             };
         }
+
+        internal static MessageModel ToMessageModel(Message message) =>
+            message is null
+            ? throw new ArgumentNullException(nameof(message))
+            : new MessageModel
+            {
+                Body = message.Body,
+                Id = message.Id,
+                TimeSentUtc = message.TimeSentUtc,
+            };
+
+        internal static MessageWithAuthorModel ToMessageWithAuthorModel(Message message) =>
+            message is null
+            ? throw new ArgumentNullException(nameof(message))
+            : new MessageWithAuthorModel
+            {
+                Author = ToUserModel(message.Author!),
+                Body = message.Body,
+                Id = message.Id,
+                TimeSentUtc = message.TimeSentUtc,
+            };
+
+        internal static MessageWithChatroomModel ToMessageWithChatroomModel(Message message) =>
+            message is null
+            ? throw new ArgumentNullException(nameof(message))
+            : new MessageWithChatroomModel
+            {
+                Body = message.Body,
+                Chatroom = ToChatroomModel(message.Chatroom!),
+                Id = message.Id,
+                TimeSentUtc = message.TimeSentUtc,
+            };
     }
 }
