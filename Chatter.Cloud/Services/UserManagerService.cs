@@ -1,6 +1,6 @@
-﻿using Nvisibl.Cloud.Models;
+﻿using Nvisibl.Cloud.Factories.Interfaces;
+using Nvisibl.Cloud.Models;
 using Nvisibl.DataLibrary.Models;
-using Nvisibl.DataLibrary.Repositories.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,21 +10,32 @@ namespace Nvisibl.Cloud.Services
 {
     public class UserManagerService
     {
-        private readonly IUnitOfWork _unitOfWork;
+        private readonly IUnitOfWorkFactory _unitOfWorkFactory;
 
-        public UserManagerService(IUnitOfWork unitOfWork)
+        public UserManagerService(IUnitOfWorkFactory unitOfWorkFactory)
         {
-            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+            _unitOfWorkFactory = unitOfWorkFactory ?? throw new ArgumentNullException(nameof(unitOfWorkFactory));
         }
 
         public async Task MakeFriendsAsync(int userId, UserModel friend)
         {
-            await _unitOfWork.FriendsRepository.AddAsync(new Friend
+            if (userId <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(userId));
+            }
+
+            if (friend is null)
+            {
+                throw new ArgumentNullException(nameof(friend));
+            }
+
+            using var unitOfWork = _unitOfWorkFactory.Create();
+            await unitOfWork.FriendsRepository.AddAsync(new Friend
             {
                 User1Id = userId,
                 User2Id = friend.Id,
             });
-            _ = await _unitOfWork.CompleteAsync();
+            _ = await unitOfWork.CompleteAsync();
         }
 
         public async Task<UserModel> CreateUserAsync(CreateUserModel createUserModel)
@@ -34,33 +45,57 @@ namespace Nvisibl.Cloud.Services
                 throw new ArgumentNullException(nameof(createUserModel));
             }
 
+            using var unitOfWork = _unitOfWorkFactory.Create();
             var user = new User { Username = createUserModel.Username, };
-            await _unitOfWork.UserRepository.AddAsync(user);
-            _ = await _unitOfWork.CompleteAsync();
+            await unitOfWork.UserRepository.AddAsync(user);
+            _ = await unitOfWork.CompleteAsync();
             return Mappers.ToUserModel(user);
         }
 
         public async Task<UserModel> GetUserByIdAsync(int id)
         {
-            return Mappers.ToUserModel(await _unitOfWork.UserRepository.GetAsync(id));
+            if (id <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(id));
+            }
+
+            using var unitOfWork = _unitOfWorkFactory.Create();
+            return Mappers.ToUserModel(await unitOfWork.UserRepository.GetAsync(id));
         }
 
         public async Task<IEnumerable<UserModel>> GetUsersAsync(int rangeOffset = 0, int rangeSize = 10)
         {
-            return (await _unitOfWork.UserRepository.GetRangeAsync(rangeOffset, rangeSize))
+            if (rangeOffset < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(rangeOffset));
+            }
+
+            if (rangeSize < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(rangeSize));
+            }
+
+            using var unitOfWork = _unitOfWorkFactory.Create();
+            return (await unitOfWork.UserRepository.GetRangeAsync(rangeOffset, rangeSize))
                 .Select(Mappers.ToUserModel)
                 .ToList();
         }
 
         public async Task<UserWithFriendsModel> GetUserWithFriendsByIdAsync(int id)
         {
-            var user = await _unitOfWork.UserRepository.GetAsync(id);
+            if (id < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(id));
+            }
+
+            using var unitOfWork = _unitOfWorkFactory.Create();
+            var user = await unitOfWork.UserRepository.GetAsync(id);
             if (user is null)
             {
                 throw new InvalidOperationException($"User with id ({id}) does not exist.");
             }
 
-            var friends = await _unitOfWork.FriendsRepository.GetAllFriendsAsync(user);
+            var friends = await unitOfWork.FriendsRepository.GetAllFriendsAsync(user);
             return Mappers.ToUserWithFriendsModel(user, friends);
         }
     }

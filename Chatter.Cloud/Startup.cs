@@ -2,8 +2,6 @@ using System;
 using Nvisibl.Cloud.Helpers;
 using Nvisibl.Cloud.Services;
 using Nvisibl.DataLibrary.Contexts;
-using Nvisibl.DataLibrary.Repositories;
-using Nvisibl.DataLibrary.Repositories.Interfaces;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -11,6 +9,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Nvisibl.Cloud.Factories.Interfaces;
+using Nvisibl.Cloud.Factories;
 
 namespace Nvisibl.Cloud
 {
@@ -29,7 +29,7 @@ namespace Nvisibl.Cloud
             services.AddDbContext<ChatContext>(
                 options => options.UseSqlServer(
                     ConnectionStringHelper.GetConnectionString(Configuration)));
-            services.AddTransient<IUnitOfWork, UnitOfWork>();
+            services.AddTransient<IUnitOfWorkFactory, UnitOfWorkFactory>();
             services.AddTransient<UserManagerService>();
             services.AddControllers();
         }
