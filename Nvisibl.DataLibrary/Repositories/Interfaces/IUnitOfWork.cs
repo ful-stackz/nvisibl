@@ -5,12 +5,7 @@ namespace Nvisibl.DataLibrary.Repositories.Interfaces
 {
     public interface IUnitOfWork : IDisposable
     {
-        IFriendsRepository FriendsRepository { get; }
-        IUserRepository UserRepository { get; }
-        IChatroomRepository ChatroomRepository { get; }
-        IChatroomUserRepository ChatroomUserRepository { get; }
-        IMessageRepository MessageRepository { get; }
-
+        T GetRepository<T>() where T : class;
         Task<int> CompleteAsync();
     }
 }

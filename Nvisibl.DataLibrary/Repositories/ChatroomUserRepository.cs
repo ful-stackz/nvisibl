@@ -4,7 +4,8 @@ using Nvisibl.DataLibrary.Repositories.Interfaces;
 
 namespace Nvisibl.DataLibrary.Repositories
 {
-    public class ChatroomUserRepository : Repository<ChatroomUser>, IChatroomUserRepository
+    [Repository]
+    internal class ChatroomUserRepository : Repository<ChatroomUser>, IChatroomUserRepository
     {
         public ChatroomUserRepository(ChatContext context)
             : base(context)

@@ -8,7 +8,8 @@ using System.Threading.Tasks;
 
 namespace Nvisibl.DataLibrary.Repositories
 {
-    public class FriendsRepository : Repository<Friend>, IFriendsRepository
+    [Repository]
+    internal class FriendsRepository : Repository<Friend>, IFriendsRepository
     {
         public FriendsRepository(ChatContext context)
             : base(context)

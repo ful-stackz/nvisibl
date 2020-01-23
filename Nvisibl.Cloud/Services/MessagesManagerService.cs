@@ -2,6 +2,7 @@
 using Nvisibl.Cloud.Models;
 using Nvisibl.Cloud.Services.Interfaces;
 using Nvisibl.DataLibrary.Models;
+using Nvisibl.DataLibrary.Repositories.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,13 +30,15 @@ namespace Nvisibl.Cloud.Services
             }
 
             using var unitOfWork = _unitOfWorkFactory.Create();
-            var chatroom = await unitOfWork.ChatroomRepository.GetAsync(chatroomId);
+
+            var chatroom = await unitOfWork.GetRepository<IChatroomRepository>().GetAsync(chatroomId);
             if (chatroom is null)
             {
                 throw new InvalidOperationException($"Chatroom with id ({chatroomId}) does not exist.");
             }
 
-            return (await unitOfWork.MessageRepository.GetChatroomMessagesAsync(chatroomId, page, pageSize))
+            return (await unitOfWork.GetRepository<IMessageRepository>()
+                .GetChatroomMessagesAsync(chatroomId, page, pageSize))
                 .Select(Mappers.ToMessageWithAuthorModel)
                 .ToList();
         }
@@ -51,13 +54,14 @@ namespace Nvisibl.Cloud.Services
             }
 
             using var unitOfWork = _unitOfWorkFactory.Create();
-            var user = await unitOfWork.UserRepository.GetAsync(userId);
+
+            var user = await unitOfWork.GetRepository<IUserRepository>().GetAsync(userId);
             if (user is null)
             {
                 throw new InvalidOperationException($"User with id ({userId}) does not exist.");
             }
 
-            return (await unitOfWork.MessageRepository.GetUserMessagesAsync(userId, page, pageSize))
+            return (await unitOfWork.GetRepository<IMessageRepository>().GetUserMessagesAsync(userId, page, pageSize))
                 .Select(Mappers.ToMessageWithChatroomModel)
                 .ToList();
         }
@@ -77,7 +81,7 @@ namespace Nvisibl.Cloud.Services
                 ChatroomId = createMessageModel.ChatroomId,
                 TimeSentUtc = createMessageModel.TimeSentUtc,
             };
-            await unitOfWork.MessageRepository.AddAsync(message);
+            await unitOfWork.GetRepository<IMessageRepository>().AddAsync(message);
             _ = await unitOfWork.CompleteAsync();
             return Mappers.ToMessageModel(message);
         }

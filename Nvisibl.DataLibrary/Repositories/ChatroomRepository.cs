@@ -9,7 +9,8 @@ using System.Threading.Tasks;
 
 namespace Nvisibl.DataLibrary.Repositories
 {
-    public class ChatroomRepository : Repository<Chatroom>, IChatroomRepository
+    [Repository]
+    internal class ChatroomRepository : Repository<Chatroom>, IChatroomRepository
     {
         public ChatroomRepository(ChatContext context)
             : base(context)

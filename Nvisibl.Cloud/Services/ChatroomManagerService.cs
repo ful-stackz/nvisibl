@@ -3,6 +3,7 @@ using Nvisibl.Cloud.Factories.Interfaces;
 using Nvisibl.Cloud.Models;
 using Nvisibl.Cloud.Services.Interfaces;
 using Nvisibl.DataLibrary.Models;
+using Nvisibl.DataLibrary.Repositories.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -27,16 +28,24 @@ namespace Nvisibl.Cloud.Services
             }
 
             using var unitOfWork = _unitOfWorkFactory.Create();
-            var owner = await unitOfWork.UserRepository.GetAsync(createChatroomModel.OwnerId);
+
+            var owner = await unitOfWork.GetRepository<IUserRepository>().GetAsync(createChatroomModel.OwnerId);
+            if (owner is null)
+            {
+                throw new InvalidOperationException($"User with id ({createChatroomModel.OwnerId}) does not exist.");
+            }
+
             var chatroom = new Chatroom { Name = createChatroomModel.ChatroomName, };
-            await unitOfWork.ChatroomRepository.AddAsync(chatroom);
+            await unitOfWork.GetRepository<IChatroomRepository>().AddAsync(chatroom);
             _ = await unitOfWork.CompleteAsync();
-            await unitOfWork.ChatroomUserRepository.AddAsync(new ChatroomUser
+
+            await unitOfWork.GetRepository<IChatroomUserRepository>().AddAsync(new ChatroomUser
             {
                 ChatroomId = chatroom.Id,
                 UserId = owner.Id,
             });
             _ = await unitOfWork.CompleteAsync();
+
             return Mappers.ToChatroomModel(chatroom);
         }
 
@@ -48,8 +57,11 @@ namespace Nvisibl.Cloud.Services
             }
 
             using var unitOfWork = _unitOfWorkFactory.Create();
-            var chatrooms = await unitOfWork.ChatroomRepository.GetAllUserChatroomsAsync(new User { Id = user.Id, });
-            return chatrooms.Select(Mappers.ToChatroomModel).ToList();
+
+            return (await unitOfWork.GetRepository<IChatroomRepository>()
+                .GetAllUserChatroomsAsync(new User { Id = user.Id, }))
+                .Select(Mappers.ToChatroomModel)
+                .ToList();
         }
 
         public async Task<ChatroomModel> GetChatroomByIdAsync(int id)
@@ -60,7 +72,8 @@ namespace Nvisibl.Cloud.Services
             }
 
             using var unitOfWork = _unitOfWorkFactory.Create();
-            var chatroom = await unitOfWork.ChatroomRepository.GetAsync(id);
+
+            var chatroom = await unitOfWork.GetRepository<IChatroomRepository>().GetAsync(id);
             if (chatroom is null)
             {
                 throw new InvalidOperationException($"Chatroom with id ({id}) does not exist.");
@@ -77,13 +90,14 @@ namespace Nvisibl.Cloud.Services
             }
 
             using var unitOfWork = _unitOfWorkFactory.Create();
-            var chatroom = await unitOfWork.ChatroomRepository.GetAsync(id);
+
+            var chatroom = await unitOfWork.GetRepository<IChatroomRepository>().GetAsync(id);
             if (chatroom is null)
             {
                 throw new InvalidOperationException($"Chatroom with id ({id}) does not exist.");
             }
 
-            var users = await unitOfWork.ChatroomRepository.GetAllChatroomUsers(id);
+            var users = await unitOfWork.GetRepository<IChatroomRepository>().GetAllChatroomUsers(id);
             return Mappers.ToChatroomWithUsersModel(chatroom, users);
         }
 
@@ -100,7 +114,8 @@ namespace Nvisibl.Cloud.Services
             }
 
             using var unitOfWork = _unitOfWorkFactory.Create();
-            return (await unitOfWork.ChatroomRepository.GetRangeAsync(page, pageSize))
+
+            return (await unitOfWork.GetRepository<IChatroomRepository>().GetRangeAsync(page, pageSize))
                 .Select(Mappers.ToChatroomModel)
                 .ToList();
         }
@@ -113,13 +128,14 @@ namespace Nvisibl.Cloud.Services
             }
 
             using var unitOfWork = _unitOfWorkFactory.Create();
-            var chatroom = await unitOfWork.ChatroomRepository.GetAsync(id);
+
+            var chatroom = await unitOfWork.GetRepository<IChatroomRepository>().GetAsync(id);
             if (chatroom is null)
             {
                 throw new InvalidOperationException($"Chatroom with id ({id}) does not exist.");
             }
 
-            unitOfWork.ChatroomRepository.Remove(chatroom);
+            unitOfWork.GetRepository<IChatroomRepository>().Remove(chatroom);
             _ = await unitOfWork.CompleteAsync();
         }
 
@@ -136,7 +152,8 @@ namespace Nvisibl.Cloud.Services
             }
 
             using var unitOfWork = _unitOfWorkFactory.Create();
-            await unitOfWork.ChatroomUserRepository.AddAsync(new ChatroomUser
+
+            await unitOfWork.GetRepository<IChatroomUserRepository>().AddAsync(new ChatroomUser
             {
                 ChatroomId = chatroomId,
                 UserId = user.Id,

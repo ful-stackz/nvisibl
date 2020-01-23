@@ -8,7 +8,8 @@ using System.Threading.Tasks;
 
 namespace Nvisibl.DataLibrary.Repositories
 {
-    public class MessageRepository : Repository<Message>, IMessageRepository
+    [Repository]
+    internal class MessageRepository : Repository<Message>, IMessageRepository
     {
         public MessageRepository(DbContext context)
             : base(context)

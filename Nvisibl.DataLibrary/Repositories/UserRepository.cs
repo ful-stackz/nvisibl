@@ -4,7 +4,8 @@ using Nvisibl.DataLibrary.Repositories.Interfaces;
 
 namespace Nvisibl.DataLibrary.Repositories
 {
-    public class UserRepository : Repository<User>, IUserRepository
+    [Repository]
+    internal class UserRepository : Repository<User>, IUserRepository
     {
         public UserRepository(ChatContext dbContext)
             : base(dbContext)
