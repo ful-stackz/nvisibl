@@ -36,6 +36,26 @@ namespace Nvisibl.Cloud.Models
             };
         }
 
+        internal static UserWithFriendsModel ToUserWithFriendsModel(UserModel user, IEnumerable<UserModel> friends)
+        {
+            if (user is null)
+            {
+                throw new ArgumentNullException(nameof(user));
+            }
+
+            if (friends is null)
+            {
+                throw new ArgumentNullException(nameof(friends));
+            }
+
+            return new UserWithFriendsModel
+            {
+                Id = user.Id,
+                Username = user.Username,
+                Friends = friends.ToList(),
+            };
+        }
+
         internal static ChatroomModel ToChatroomModel(Chatroom chatroom) =>
             chatroom is null
             ? throw new ArgumentNullException(nameof(chatroom))
