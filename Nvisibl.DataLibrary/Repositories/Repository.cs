@@ -78,19 +78,19 @@ namespace Nvisibl.DataLibrary.Repositories
             return await Context.Set<TEntity>().FindAsync(id);
         }
 
-        public virtual IEnumerable<TEntity> GetRange(int offset, int rangeSize)
+        public virtual IEnumerable<TEntity> GetRange(int page, int pageSize)
         {
             return Context.Set<TEntity>()
-                .Skip((offset < 0 ? 0 : offset) * rangeSize)
-                .Take(rangeSize)
+                .Skip((page < 0 ? 0 : page) * pageSize)
+                .Take(pageSize)
                 .ToList();
         }
 
-        public virtual async Task<IEnumerable<TEntity>> GetRangeAsync(int offset, int rangeSize)
+        public virtual async Task<IEnumerable<TEntity>> GetRangeAsync(int page, int pageSize)
         {
             return await Context.Set<TEntity>()
-                .Skip((offset < 0 ? 0 : offset) * rangeSize)
-                .Take(rangeSize)
+                .Skip((page < 0 ? 0 : page) * pageSize)
+                .Take(pageSize)
                 .ToListAsync();
         }
 

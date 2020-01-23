@@ -22,9 +22,9 @@ namespace Nvisibl.DataLibrary.Repositories.Interfaces
 
         Task<TEntity> GetAsync(int id);
 
-        IEnumerable<TEntity> GetRange(int offset, int rangeSize);
+        IEnumerable<TEntity> GetRange(int page, int pageSize);
 
-        Task<IEnumerable<TEntity>> GetRangeAsync(int offset, int rangeSize);
+        Task<IEnumerable<TEntity>> GetRangeAsync(int page, int pageSize);
 
         void Remove(TEntity entity);
 

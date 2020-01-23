@@ -23,24 +23,24 @@ namespace Nvisibl.Cloud.Controllers
 
         [HttpGet]
         public async Task<ActionResult> GetAsync(
-            [FromQuery] int offset = 0,
+            [FromQuery] int page = 0,
             [FromQuery] int pageSize = 10)
         {
             try
             {
-                return new JsonResult(await _userManager.GetUsersAsync(offset, pageSize));
+                return new JsonResult(await _userManager.GetUsersAsync(page, pageSize));
             }
             catch (Exception ex)
             {
                 _logger.LogWarning(
                     exception: ex,
-                    $"Could not retrieve users. {nameof(offset)} = {offset}; {nameof(pageSize)} = {pageSize}");
+                    $"Could not retrieve users. {nameof(page)} = {page}; {nameof(pageSize)} = {pageSize}");
                 return BadRequest();
             }
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult> GetUserAsync(int id)
+        public async Task<ActionResult> GetByIdAsync(int id)
         {
             try
             {
@@ -57,7 +57,7 @@ namespace Nvisibl.Cloud.Controllers
         }
 
         [HttpGet("{id}/friends")]
-        public async Task<ActionResult> GetUserFriendsAsync(int id)
+        public async Task<ActionResult> GetFriendsAsync(int id)
         {
             try
             {
@@ -71,7 +71,7 @@ namespace Nvisibl.Cloud.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> CreateUserAsync(
+        public async Task<ActionResult> CreateAsync(
             [FromBody] CreateUserModel userRequest)
         {
             try
@@ -86,7 +86,7 @@ namespace Nvisibl.Cloud.Controllers
         }
 
         [HttpPost("{id}/friends")]
-        public async Task<ActionResult> AddUserFriendAsync(
+        public async Task<ActionResult> AddFriendAsync(
             int id,
             [FromBody] UserModel friend)
         {

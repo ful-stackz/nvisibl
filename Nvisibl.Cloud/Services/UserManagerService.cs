@@ -69,21 +69,21 @@ namespace Nvisibl.Cloud.Services
             return Mappers.ToUserModel(await unitOfWork.GetRepository<IUserRepository>().GetAsync(id));
         }
 
-        public async Task<IEnumerable<UserModel>> GetUsersAsync(int rangeOffset = 0, int rangeSize = 10)
+        public async Task<IEnumerable<UserModel>> GetUsersAsync(int page = 0, int pageSize = 10)
         {
-            if (rangeOffset < 0)
+            if (page < 0)
             {
-                throw new ArgumentOutOfRangeException(nameof(rangeOffset));
+                throw new ArgumentOutOfRangeException(nameof(page));
             }
 
-            if (rangeSize < 0)
+            if (pageSize < 0)
             {
-                throw new ArgumentOutOfRangeException(nameof(rangeSize));
+                throw new ArgumentOutOfRangeException(nameof(pageSize));
             }
 
             using var unitOfWork = _unitOfWorkFactory.Create();
 
-            return (await unitOfWork.GetRepository<IUserRepository>().GetRangeAsync(rangeOffset, rangeSize))
+            return (await unitOfWork.GetRepository<IUserRepository>().GetRangeAsync(page, pageSize))
                 .Select(Mappers.ToUserModel)
                 .ToList();
         }
