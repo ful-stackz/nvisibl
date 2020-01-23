@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Nvisibl.DataLibrary.Repositories
 {
-    internal abstract class Repository<TEntity> : IRepository<TEntity>
+    internal abstract class Repository<TEntity> : IRepositoryT<TEntity>
         where TEntity : class
     {
         public Repository(DbContext context)

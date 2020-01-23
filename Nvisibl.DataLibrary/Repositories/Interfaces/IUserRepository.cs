@@ -2,7 +2,7 @@
 
 namespace Nvisibl.DataLibrary.Repositories.Interfaces
 {
-    public interface IUserRepository : IRepository<User>
+    public interface IUserRepository : IRepositoryT<User>
     {
     }
 }

@@ -2,7 +2,7 @@
 
 namespace Nvisibl.DataLibrary.Repositories.Interfaces
 {
-    public interface IChatroomUserRepository : IRepository<ChatroomUser>
+    public interface IChatroomUserRepository : IRepositoryT<ChatroomUser>
     {
     }
 }

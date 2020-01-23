@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace Nvisibl.DataLibrary.Repositories.Interfaces
 {
-    public interface IFriendsRepository : IRepository<Friend>
+    public interface IFriendsRepository : IRepositoryT<Friend>
     {
         Task<IEnumerable<User>> GetAllFriendsAsync(User user);
     }

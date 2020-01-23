@@ -11,7 +11,7 @@ namespace Nvisibl.DataLibrary.Repositories
     public class UnitOfWork : IUnitOfWork
     {
         private readonly ChatContext _chatContext;
-        private readonly List<object> _repositories;
+        private readonly List<IRepository> _repositories;
 
         private bool _isDisposed;
 
@@ -23,11 +23,12 @@ namespace Nvisibl.DataLibrary.Repositories
                 .Where(t => t.GetCustomAttribute<RepositoryAttribute>() is { })
                 .Where(t => t.GetConstructor(new Type[] { typeof(ChatContext) }) is { })
                 .Select(t => Activator.CreateInstance(t, chatContext))
+                .OfType<IRepository>()
                 .ToList();
         }
 
         public T GetRepository<T>()
-            where T : class
+            where T : class, IRepository
         {
             var targetType = typeof(T);
             return _repositories.FirstOrDefault(repo => targetType.IsAssignableFrom(repo.GetType())) as T ??

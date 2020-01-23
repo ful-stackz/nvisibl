@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace Nvisibl.DataLibrary.Repositories.Interfaces
 {
-    public interface IChatroomRepository : IRepository<Chatroom>
+    public interface IChatroomRepository : IRepositoryT<Chatroom>
     {
         Task<IEnumerable<Chatroom>> GetAllUserChatroomsAsync(User user);
         Task<IEnumerable<User>> GetAllChatroomUsers(int id);
