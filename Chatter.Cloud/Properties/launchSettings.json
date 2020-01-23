@@ -14,7 +14,7 @@
       "launchBrowser": true,
       "launchUrl": "api/users",
       "environmentVariables": {
-        "DB_CONNECTIONSTRING": "NvisiblDB",
+        "DB_CONNECTIONSTRING": "Data Source=DESKTOP-PH53E89\\SQLEXPRESS;Initial Catalog=NvisiblDB;Integrated Security=True",
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
