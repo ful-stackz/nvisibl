@@ -40,12 +40,12 @@ namespace Nvisibl.DataLibrary.Contexts
 
             builder.Entity<ChatroomUser>()
                 .HasOne(cu => cu.Chatroom)
-                .WithMany(c => c.Users)
+                .WithMany(c => c!.Users)
                 .HasForeignKey(cu => cu.ChatroomId);
 
             builder.Entity<ChatroomUser>()
                 .HasOne(cu => cu.User)
-                .WithMany(u => u.Chatrooms)
+                .WithMany(u => u!.Chatrooms)
                 .HasForeignKey(cu => cu.UserId);
         }
     }

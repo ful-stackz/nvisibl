@@ -10,8 +10,8 @@ namespace Nvisibl.DataLibrary.Models
         [Required]
         public int User2Id { get; set; }
 
-        public User User1 { get; set; } = new User();
+        public User? User1 { get; set; }
 
-        public User User2 { get; set; } = new User();
+        public User? User2 { get; set; }
     }
 }
