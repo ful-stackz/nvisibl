@@ -17,7 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Chatter.DataLibrary\Nvisibl.DataLibrary.csproj" />
+    <ProjectReference Include="..\Nvisibl.DataLibrary\Nvisibl.DataLibrary.csproj" />
   </ItemGroup>
 
 

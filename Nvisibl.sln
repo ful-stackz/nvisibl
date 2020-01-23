@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29521.150
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Nvisibl.Cloud", "Chatter.Cloud\Nvisibl.Cloud.csproj", "{4CE15EE9-5FFD-430F-AE50-BA711E95ED73}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Nvisibl.Cloud", "Nvisibl.Cloud\Nvisibl.Cloud.csproj", "{4CE15EE9-5FFD-430F-AE50-BA711E95ED73}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Nvisibl.DataLibrary", "Chatter.DataLibrary\Nvisibl.DataLibrary.csproj", "{2087DBD3-56A2-4794-A037-C7CC0F4C2004}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Nvisibl.DataLibrary", "Nvisibl.DataLibrary\Nvisibl.DataLibrary.csproj", "{2087DBD3-56A2-4794-A037-C7CC0F4C2004}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
