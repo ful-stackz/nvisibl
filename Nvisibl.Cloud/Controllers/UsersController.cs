@@ -61,11 +61,11 @@ namespace Nvisibl.Cloud.Controllers
         {
             try
             {
-                return new JsonResult(await _userManager.GetUserWithFriendsByIdAsync(id));
+                return new JsonResult(await _userManager.GetFriendsAsync(id));
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, $"Could not retrieve user with id ({id}) and friend list.");
+                _logger.LogWarning(ex, $"Could not friends of user with id ({id}).");
                 return BadRequest();
             }
         }

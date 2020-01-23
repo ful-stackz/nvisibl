@@ -88,23 +88,24 @@ namespace Nvisibl.Cloud.Services
                 .ToList();
         }
 
-        public async Task<UserWithFriendsModel> GetUserWithFriendsByIdAsync(int id)
+        public async Task<IEnumerable<UserModel>> GetFriendsAsync(int userId)
         {
-            if (id < 0)
+            if (userId < 0)
             {
-                throw new ArgumentOutOfRangeException(nameof(id));
+                throw new ArgumentOutOfRangeException(nameof(userId));
             }
 
             using var unitOfWork = _unitOfWorkFactory.Create();
 
-            var user = await unitOfWork.GetRepository<IUserRepository>().GetAsync(id);
+            var user = await unitOfWork.GetRepository<IUserRepository>().GetAsync(userId);
             if (user is null)
             {
-                throw new InvalidOperationException($"User with id ({id}) does not exist.");
+                throw new InvalidOperationException($"User with id ({userId}) does not exist.");
             }
 
-            var friends = await unitOfWork.GetRepository<IFriendsRepository>().GetAllFriendsAsync(user);
-            return Mappers.ToUserWithFriendsModel(user, friends);
+            return (await unitOfWork.GetRepository<IFriendsRepository>().GetAllFriendsAsync(user))
+                .Select(Mappers.ToUserModel)
+                .ToList();
         }
     }
 }
