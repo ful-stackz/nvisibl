@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Nvisibl.Cloud.Models;
-using Nvisibl.Cloud.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Nvisibl.Cloud.Services.Interfaces;
@@ -40,14 +39,24 @@ namespace Nvisibl.Cloud.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult> GetByIdAsync(int id)
+        public async Task<ActionResult> GetByIdAsync(
+            int id,
+            [FromQuery] bool includeFriends = false)
         {
             try
             {
                 var user = await _userManager.GetUserByIdAsync(id);
-                return user is { }
-                    ? new JsonResult(user)
-                    : (ActionResult)NotFound();
+                if (user is null)
+                {
+                    return NotFound();
+                }
+
+                return new JsonResult(new
+                {
+                    user.Id,
+                    user.Username,
+                    Friends = includeFriends ? await _userManager.GetFriendsAsync(id) : Array.Empty<UserModel>(),
+                });
             }
             catch (Exception ex)
             {

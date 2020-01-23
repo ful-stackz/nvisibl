@@ -9,9 +9,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Nvisibl.Cloud.Factories.Interfaces;
-using Nvisibl.Cloud.Factories;
 using Nvisibl.Cloud.Services.Interfaces;
+using Nvisibl.DataLibrary.Repositories;
+using Nvisibl.DataLibrary.Repositories.Interfaces;
 
 namespace Nvisibl.Cloud
 {
@@ -30,7 +30,7 @@ namespace Nvisibl.Cloud
             services.AddDbContext<ChatContext>(
                 options => options.UseSqlServer(
                     ConnectionStringHelper.GetConnectionString(Configuration)));
-            services.AddTransient<IUnitOfWorkFactory, UnitOfWorkFactory>();
+            services.AddTransient<IUnitOfWork, UnitOfWork>();
             services.AddTransient<IUserManagerService, UserManagerService>();
             services.AddTransient<IChatroomManagerService, ChatroomManagerService>();
             services.AddTransient<IMessagesManagerService, MessagesManagerService>();
