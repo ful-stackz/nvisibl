@@ -11,6 +11,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Nvisibl.Cloud.Factories.Interfaces;
 using Nvisibl.Cloud.Factories;
+using Nvisibl.Cloud.Services.Interfaces;
 
 namespace Nvisibl.Cloud
 {
@@ -30,7 +31,7 @@ namespace Nvisibl.Cloud
                 options => options.UseSqlServer(
                     ConnectionStringHelper.GetConnectionString(Configuration)));
             services.AddTransient<IUnitOfWorkFactory, UnitOfWorkFactory>();
-            services.AddTransient<UserManagerService>();
+            services.AddTransient<IUserManagerService, UserManagerService>();
             services.AddControllers();
         }
 

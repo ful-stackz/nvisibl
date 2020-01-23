@@ -1,5 +1,6 @@
 ﻿using Nvisibl.Cloud.Factories.Interfaces;
 using Nvisibl.Cloud.Models;
+using Nvisibl.Cloud.Services.Interfaces;
 using Nvisibl.DataLibrary.Models;
 using System;
 using System.Collections.Generic;
@@ -8,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Nvisibl.Cloud.Services
 {
-    public class UserManagerService
+    public class UserManagerService : IUserManagerService
     {
         private readonly IUnitOfWorkFactory _unitOfWorkFactory;
 

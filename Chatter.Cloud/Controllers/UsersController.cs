@@ -4,6 +4,7 @@ using Nvisibl.Cloud.Models;
 using Nvisibl.Cloud.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Nvisibl.Cloud.Services.Interfaces;
 
 namespace Nvisibl.Cloud.Controllers
 {
@@ -11,10 +12,10 @@ namespace Nvisibl.Cloud.Controllers
     [ApiController]
     public class UsersController : ControllerBase
     {
-        private readonly UserManagerService _userManager;
+        private readonly IUserManagerService _userManager;
         private readonly ILogger<UsersController> _logger;
 
-        public UsersController(UserManagerService userManagerService, ILogger<UsersController> logger)
+        public UsersController(IUserManagerService userManagerService, ILogger<UsersController> logger)
         {
             _userManager = userManagerService ?? throw new ArgumentNullException(nameof(userManagerService));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
