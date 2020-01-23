@@ -32,6 +32,7 @@ namespace Nvisibl.Cloud
                     ConnectionStringHelper.GetConnectionString(Configuration)));
             services.AddTransient<IUnitOfWorkFactory, UnitOfWorkFactory>();
             services.AddTransient<IUserManagerService, UserManagerService>();
+            services.AddTransient<IChatroomManagerService, ChatroomManagerService>();
             services.AddControllers();
         }
 

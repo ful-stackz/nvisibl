@@ -35,5 +35,34 @@ namespace Nvisibl.Cloud.Models
                 Friends = friends.Select(ToUserModel).ToList(),
             };
         }
+
+        internal static ChatroomModel ToChatroomModel(Chatroom chatroom) =>
+            chatroom is null
+            ? throw new ArgumentNullException(nameof(chatroom))
+            : new ChatroomModel
+            {
+                Id = chatroom.Id,
+                Name = chatroom.Name,
+            };
+
+        internal static ChatroomWithUsersModel ToChatroomWithUsersModel(Chatroom chatroom, IEnumerable<User> users)
+        {
+            if (chatroom is null)
+            {
+                throw new ArgumentNullException(nameof(chatroom));
+            }
+
+            if (users is null)
+            {
+                throw new ArgumentNullException(nameof(users));
+            }
+
+            return new ChatroomWithUsersModel
+            {
+                Id = chatroom.Id,
+                Name = chatroom.Name,
+                Users = users.Select(ToUserModel).ToList(),
+            };
+        }
     }
 }
