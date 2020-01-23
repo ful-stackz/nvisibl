@@ -7,6 +7,9 @@ namespace Nvisibl.DataLibrary.Repositories.Interfaces
     {
         IFriendsRepository FriendsRepository { get; }
         IUserRepository UserRepository { get; }
+        IChatroomRepository ChatroomRepository { get; }
+        IChatroomUserRepository ChatroomUserRepository { get; }
+
 
         Task<int> CompleteAsync();
     }

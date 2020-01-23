@@ -14,12 +14,16 @@ namespace Nvisibl.DataLibrary.Repositories
         public UnitOfWork(ChatContext chatContext)
         {
             _chatContext = chatContext ?? throw new ArgumentNullException(nameof(chatContext));
-            FriendsRepository = new FriendsRepository(chatContext);
             UserRepository = new UserRepository(chatContext);
+            FriendsRepository = new FriendsRepository(chatContext);
+            ChatroomRepository = new ChatroomRepository(chatContext);
+            ChatroomUserRepository = new ChatroomUserRepository(chatContext);
         }
 
-        public IFriendsRepository FriendsRepository { get; }
         public IUserRepository UserRepository { get; }
+        public IFriendsRepository FriendsRepository { get; }
+        public IChatroomRepository ChatroomRepository { get; }
+        public IChatroomUserRepository ChatroomUserRepository { get; }
 
         public async Task<int> CompleteAsync()
         {

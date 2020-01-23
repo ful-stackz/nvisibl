@@ -13,8 +13,10 @@ namespace Nvisibl.DataLibrary.Models
         [Column(TypeName = "varchar(50)")]
         public string Username { get; set; } = string.Empty;
 
-        public virtual IList<Friend> Friends { get; set; } = new List<Friend>();
+        public IList<Friend> Friends { get; set; } = new List<Friend>();
 
-        public virtual IList<Friend> FriendedBy { get; set; } = new List<Friend>();
+        public IList<Friend> FriendedBy { get; set; } = new List<Friend>();
+
+        public IList<ChatroomUser> Chatrooms { get; set; } = new List<ChatroomUser>();
     }
 }
