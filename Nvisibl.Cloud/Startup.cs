@@ -12,6 +12,11 @@ using Microsoft.Extensions.Logging;
 using Nvisibl.Cloud.Services.Interfaces;
 using Nvisibl.DataLibrary.Repositories;
 using Nvisibl.DataLibrary.Repositories.Interfaces;
+using Nvisibl.Cloud.Middleware;
+using Nvisibl.Cloud.WebSockets.Interfaces;
+using Nvisibl.Cloud.WebSockets;
+using Nvisibl.Cloud.WebSockets.Messages.Interfaces;
+using Nvisibl.Cloud.WebSockets.Messages;
 
 namespace Nvisibl.Cloud
 {
@@ -27,13 +32,21 @@ namespace Nvisibl.Cloud
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddLogging(options => options.AddConsole());
+
             services.AddDbContext<ChatContext>(
                 options => options.UseSqlServer(
                     ConnectionStringHelper.GetConnectionString(Configuration)));
+
             services.AddTransient<IUnitOfWork, UnitOfWork>();
             services.AddTransient<IUserManagerService, UserManagerService>();
             services.AddTransient<IChatroomManagerService, ChatroomManagerService>();
             services.AddTransient<IMessagesManagerService, MessagesManagerService>();
+
+            services.AddSingleton<IMessageParser, MessageParser>();
+            services.AddSingleton<ClientManager>();
+            services.AddSingleton<IChatClientManager>(sp => sp.GetService<ClientManager>());
+            services.AddSingleton<INotificationClientManager>(sp => sp.GetService<ClientManager>());
+
             services.AddControllers();
         }
 
@@ -43,6 +56,10 @@ namespace Nvisibl.Cloud
             {
                 app.UseDeveloperExceptionPage();
             }
+
+            app.UseWebSockets();
+
+            app.UseWebSocketsMiddleware();
 
             app.UseHttpsRedirection();
 
