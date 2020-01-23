@@ -18,5 +18,7 @@ namespace Nvisibl.DataLibrary.Models
         public IList<Friend> FriendedBy { get; set; } = new List<Friend>();
 
         public IList<ChatroomUser> Chatrooms { get; set; } = new List<ChatroomUser>();
+
+        public IList<Message> Messages { get; set; } = new List<Message>();
     }
 }

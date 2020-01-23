@@ -20,6 +20,8 @@ namespace Nvisibl.DataLibrary.Contexts
 
         public DbSet<ChatroomUser> ChatroomUsers { get; set; }
 
+        public DbSet<Message> Messages { get; set; }
+
         protected override void OnModelCreating(ModelBuilder builder)
         {
             builder.Entity<Friend>().HasKey(e => new { e.User1Id, e.User2Id });
@@ -47,6 +49,19 @@ namespace Nvisibl.DataLibrary.Contexts
                 .HasOne(cu => cu.User)
                 .WithMany(u => u!.Chatrooms)
                 .HasForeignKey(cu => cu.UserId);
+
+            builder.Entity<Message>()
+                .HasIndex(m => new { m.AuthorId, m.ChatroomId });
+
+            builder.Entity<Message>()
+                .HasOne(m => m.Author)
+                .WithMany(u => u!.Messages)
+                .HasForeignKey(m => m.AuthorId);
+
+            builder.Entity<Message>()
+                .HasOne(m => m.Chatroom)
+                .WithMany(c => c!.Messages)
+                .HasForeignKey(m => m.ChatroomId);
         }
     }
 }

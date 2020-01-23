@@ -9,7 +9,7 @@ namespace Nvisibl.DataLibrary.Repositories.Interfaces
         IUserRepository UserRepository { get; }
         IChatroomRepository ChatroomRepository { get; }
         IChatroomUserRepository ChatroomUserRepository { get; }
-
+        IMessageRepository MessageRepository { get; }
 
         Task<int> CompleteAsync();
     }

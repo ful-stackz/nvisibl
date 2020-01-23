@@ -18,12 +18,14 @@ namespace Nvisibl.DataLibrary.Repositories
             FriendsRepository = new FriendsRepository(chatContext);
             ChatroomRepository = new ChatroomRepository(chatContext);
             ChatroomUserRepository = new ChatroomUserRepository(chatContext);
+            MessageRepository = new MessageRepository(chatContext);
         }
 
         public IUserRepository UserRepository { get; }
         public IFriendsRepository FriendsRepository { get; }
         public IChatroomRepository ChatroomRepository { get; }
         public IChatroomUserRepository ChatroomUserRepository { get; }
+        public IMessageRepository MessageRepository { get; }
 
         public async Task<int> CompleteAsync()
         {

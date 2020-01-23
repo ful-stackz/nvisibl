@@ -14,5 +14,7 @@ namespace Nvisibl.DataLibrary.Models
         public string Name { get; set; } = string.Empty;
 
         public IList<ChatroomUser> Users { get; set; } = new List<ChatroomUser>();
+
+        public IList<Message> Messages { get; set; } = new List<Message>();
     }
 }
