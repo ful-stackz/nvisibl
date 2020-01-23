@@ -24,14 +24,15 @@ namespace Nvisibl.DataLibrary.Contexts
         {
             builder.Entity<Friend>().HasKey(e => new { e.User1Id, e.User2Id });
 
-            builder.Entity<User>()
-                .HasMany(u => u.Friends)
-                .WithOne(f => f.User1)
-                .HasForeignKey(f => f.User1Id);
+            builder.Entity<Friend>()
+                .HasOne(f => f.User1)
+                .WithMany(u => u!.Friends)
+                .HasForeignKey(f => f.User1Id)
+                .OnDelete(DeleteBehavior.Cascade);
 
-            builder.Entity<User>()
-                .HasMany(u => u.FriendedBy)
-                .WithOne(f => f.User2)
+            builder.Entity<Friend>()
+                .HasOne(f => f.User2)
+                .WithMany(u => u!.FriendedBy)
                 .HasForeignKey(f => f.User2Id)
                 .OnDelete(DeleteBehavior.NoAction);
 
