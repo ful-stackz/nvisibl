@@ -14,8 +14,7 @@
       "launchBrowser": true,
       "launchUrl": "api/users",
       "environmentVariables": {
-        "DB_DATABASE": "NvisiblDB",
-        "DB_DATASOURCE": "DESKTOP-IKHT2AS\\SQLEXPRESS",
+        "DB_CONNECTIONSTRING": "NvisiblDB",
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
