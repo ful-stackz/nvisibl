@@ -16,6 +16,10 @@ namespace Nvisibl.DataLibrary.Contexts
 
         public DbSet<Friend> Friends { get; set; }
 
+        public DbSet<Chatroom> Chatrooms { get; set; }
+
+        public DbSet<ChatroomUser> ChatroomUsers { get; set; }
+
         protected override void OnModelCreating(ModelBuilder builder)
         {
             builder.Entity<Friend>().HasKey(e => new { e.User1Id, e.User2Id });
@@ -30,6 +34,18 @@ namespace Nvisibl.DataLibrary.Contexts
                 .WithOne(f => f.User2)
                 .HasForeignKey(f => f.User2Id)
                 .OnDelete(DeleteBehavior.NoAction);
+
+            builder.Entity<ChatroomUser>().HasKey(e => new { e.ChatroomId, e.UserId });
+
+            builder.Entity<ChatroomUser>()
+                .HasOne(cu => cu.Chatroom)
+                .WithMany(c => c.Users)
+                .HasForeignKey(cu => cu.ChatroomId);
+
+            builder.Entity<ChatroomUser>()
+                .HasOne(cu => cu.User)
+                .WithMany(u => u.Chatrooms)
+                .HasForeignKey(cu => cu.UserId);
         }
     }
 }
