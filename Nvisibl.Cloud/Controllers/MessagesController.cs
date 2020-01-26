@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using Nvisibl.Cloud.Models;
+using Nvisibl.Cloud.Models.Messages;
 using Nvisibl.Cloud.Services.Interfaces;
 using System;
 using System.Threading.Tasks;
@@ -11,10 +11,10 @@ namespace Nvisibl.Cloud.Controllers
     [ApiController]
     public class MessagesController : ControllerBase
     {
-        private readonly IMessagesManagerService _messagesManagerService;
+        private readonly IMessagesManager _messagesManagerService;
         private readonly ILogger<MessagesController> _logger;
 
-        public MessagesController(IMessagesManagerService messagesManagerService, ILogger<MessagesController> logger)
+        public MessagesController(IMessagesManager messagesManagerService, ILogger<MessagesController> logger)
         {
             _messagesManagerService = messagesManagerService ?? throw new ArgumentNullException(nameof(messagesManagerService));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));

@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Nvisibl.Cloud.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Nvisibl.Cloud.Services.Interfaces;
+using Nvisibl.Cloud.Models.Users;
 
 namespace Nvisibl.Cloud.Controllers
 {
@@ -11,10 +11,10 @@ namespace Nvisibl.Cloud.Controllers
     [ApiController]
     public class UsersController : ControllerBase
     {
-        private readonly IUserManagerService _userManager;
+        private readonly IUsersManager _userManager;
         private readonly ILogger<UsersController> _logger;
 
-        public UsersController(IUserManagerService userManagerService, ILogger<UsersController> logger)
+        public UsersController(IUsersManager userManagerService, ILogger<UsersController> logger)
         {
             _userManager = userManagerService ?? throw new ArgumentNullException(nameof(userManagerService));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -45,7 +45,7 @@ namespace Nvisibl.Cloud.Controllers
         {
             try
             {
-                var user = await _userManager.GetUserByIdAsync(id);
+                var user = await _userManager.GetUserAsync(id);
                 if (user is null)
                 {
                     return NotFound();
@@ -55,7 +55,7 @@ namespace Nvisibl.Cloud.Controllers
                 {
                     user.Id,
                     user.Username,
-                    Friends = includeFriends ? await _userManager.GetFriendsAsync(id) : Array.Empty<UserModel>(),
+                    Friends = includeFriends ? await _userManager.GetUserFriendsAsync(id) : Array.Empty<UserModel>(),
                 });
             }
             catch (Exception ex)
@@ -70,7 +70,7 @@ namespace Nvisibl.Cloud.Controllers
         {
             try
             {
-                return new JsonResult(await _userManager.GetFriendsAsync(id));
+                return new JsonResult(await _userManager.GetUserFriendsAsync(id));
             }
             catch (Exception ex)
             {
@@ -81,15 +81,15 @@ namespace Nvisibl.Cloud.Controllers
 
         [HttpPost]
         public async Task<ActionResult> CreateAsync(
-            [FromBody] CreateUserModel userRequest)
+            [FromBody] CreateUserModel createUserModel)
         {
             try
             {
-                return new JsonResult(await _userManager.CreateUserAsync(userRequest));
+                return new JsonResult(await _userManager.CreateUserAsync(createUserModel));
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, $"Could not create new user record. {userRequest.Username}");
+                _logger.LogWarning(ex, $"Could not create new user record. {createUserModel.Username}");
                 return BadRequest();
             }
         }
@@ -101,7 +101,7 @@ namespace Nvisibl.Cloud.Controllers
         {
             try
             {
-                await _userManager.MakeFriendsAsync(id, friend);
+                await _userManager.AddUserFriendAsync(new UserModel { Id = id }, friend);
                 return NoContent();
             }
             catch (Exception ex)

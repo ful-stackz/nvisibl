@@ -1,11 +1,11 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Nvisibl.Cloud.Models
+namespace Nvisibl.Cloud.Models.Chatrooms
 {
-    public class CreateMessageModel : MessageModel
+    public class AddUserToChatroomModel
     {
         [Required]
-        public int AuthorId { get; set; }
+        public int UserId { get; set; }
 
         [Required]
         public int ChatroomId { get; set; }

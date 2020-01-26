@@ -1,4 +1,5 @@
 ﻿using Nvisibl.Cloud.Models;
+using Nvisibl.Cloud.Models.Users;
 using Nvisibl.Cloud.Services.Interfaces;
 using Nvisibl.DataLibrary.Models;
 using Nvisibl.DataLibrary.Repositories.Interfaces;
@@ -9,40 +10,15 @@ using System.Threading.Tasks;
 
 namespace Nvisibl.Cloud.Services
 {
-    public class UserManagerService : IUserManagerService
+    public class UsersManager : IUsersManager
     {
         private readonly IUnitOfWork _unitOfWork;
 
         private bool _isDisposed;
 
-        public UserManagerService(IUnitOfWork unitOfWork)
+        public UsersManager(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
-        }
-
-        public async Task MakeFriendsAsync(int userId, UserModel friend)
-        {
-            if (_isDisposed)
-            {
-                throw new ObjectDisposedException(GetType().Name);
-            }
-
-            if (userId <= 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(userId));
-            }
-
-            if (friend is null)
-            {
-                throw new ArgumentNullException(nameof(friend));
-            }
-
-            await _unitOfWork.GetRepository<IFriendsRepository>().AddAsync(new Friend
-            {
-                User1Id = userId,
-                User2Id = friend.Id,
-            });
-            _ = await _unitOfWork.CompleteAsync();
         }
 
         public async Task<UserModel> CreateUserAsync(CreateUserModel createUserModel)
@@ -64,14 +40,14 @@ namespace Nvisibl.Cloud.Services
             return Mappers.ToUserModel(user);
         }
 
-        public async Task<UserModel> GetUserByIdAsync(int id)
+        public async Task<UserModel> GetUserAsync(int id)
         {
             if (_isDisposed)
             {
                 throw new ObjectDisposedException(GetType().Name);
             }
 
-            if (id <= 0)
+            if (id < 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(id));
             }
@@ -101,27 +77,51 @@ namespace Nvisibl.Cloud.Services
                 .ToList();
         }
 
-        public async Task<IEnumerable<UserModel>> GetFriendsAsync(int userId)
+        public async Task<IEnumerable<UserModel>> GetUserFriendsAsync(int id)
         {
             if (_isDisposed)
             {
                 throw new ObjectDisposedException(GetType().Name);
             }
 
-            if (userId < 0)
+            if (id < 0)
             {
-                throw new ArgumentOutOfRangeException(nameof(userId));
+                throw new ArgumentOutOfRangeException(nameof(id));
             }
 
-            var user = await _unitOfWork.GetRepository<IUserRepository>().GetAsync(userId);
-            if (user is null)
-            {
-                throw new InvalidOperationException($"User with id ({userId}) does not exist.");
-            }
+            await EnsureUserExistsAsync(id);
 
-            return (await _unitOfWork.GetRepository<IFriendsRepository>().GetAllFriendsAsync(user))
+            return (await _unitOfWork.GetRepository<IFriendsRepository>().GetAllFriendsAsync(new User { Id = id, }))
                 .Select(Mappers.ToUserModel)
                 .ToList();
+        }
+
+        public async Task AddUserFriendAsync(UserModel userModel, UserModel friendUserModel)
+        {
+            if (_isDisposed)
+            {
+                throw new ObjectDisposedException(GetType().Name);
+            }
+
+            if (userModel is null)
+            {
+                throw new ArgumentNullException(nameof(userModel));
+            }
+
+            if (friendUserModel is null)
+            {
+                throw new ArgumentNullException(nameof(friendUserModel));
+            }
+
+            await EnsureUserExistsAsync(userModel.Id);
+            await EnsureUserExistsAsync(friendUserModel.Id);
+
+            await _unitOfWork.GetRepository<IFriendsRepository>().AddAsync(new Friend
+            {
+                User1Id = userModel.Id,
+                User2Id = friendUserModel.Id,
+            });
+            _ = await _unitOfWork.CompleteAsync();
         }
 
         public void Dispose()
@@ -139,6 +139,14 @@ namespace Nvisibl.Cloud.Services
                     _unitOfWork.Dispose();
                 }
                 _isDisposed = true;
+            }
+        }
+
+        private async Task EnsureUserExistsAsync(int id)
+        {
+            if (await _unitOfWork.GetRepository<IUserRepository>().GetAsync(id) is null)
+            {
+                throw new InvalidOperationException($"User with id ({id}) does not exist.");
             }
         }
     }

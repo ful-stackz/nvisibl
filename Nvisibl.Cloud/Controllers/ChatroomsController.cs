@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using Nvisibl.Cloud.Models;
+using Nvisibl.Cloud.Models.Chatrooms;
+using Nvisibl.Cloud.Models.Users;
 using Nvisibl.Cloud.Services.Interfaces;
 using System;
 using System.Threading.Tasks;
@@ -11,10 +12,10 @@ namespace Nvisibl.Cloud.Controllers
     [ApiController]
     public class ChatroomsController : ControllerBase
     {
-        private readonly IChatroomManagerService _chatroomManagerService;
+        private readonly IChatroomsManager _chatroomManagerService;
         private readonly ILogger<ChatroomsController> _logger;
 
-        public ChatroomsController(IChatroomManagerService chatroomManagerService, ILogger<ChatroomsController> logger)
+        public ChatroomsController(IChatroomsManager chatroomManagerService, ILogger<ChatroomsController> logger)
         {
             _chatroomManagerService = chatroomManagerService ?? throw new ArgumentNullException(nameof(chatroomManagerService));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -49,9 +50,16 @@ namespace Nvisibl.Cloud.Controllers
         {
             try
             {
-                return new JsonResult(includeUsers
-                    ? await _chatroomManagerService.GetChatroomByIdWithUsersAsync(id)
-                    : await _chatroomManagerService.GetChatroomByIdAsync(id));
+                var chatroom = await _chatroomManagerService.GetChatroomAsync(id);
+                var chatroomUsers = includeUsers
+                    ? await _chatroomManagerService.GetChatroomUsersAsync(id)
+                    : Array.Empty<UserModel>();
+                return new JsonResult(new
+                {
+                    chatroom.Id,
+                    chatroom.Name,
+                    Users = chatroomUsers,
+                });
             }
             catch (InvalidOperationException)
             {
@@ -105,7 +113,11 @@ namespace Nvisibl.Cloud.Controllers
         {
             try
             {
-                await _chatroomManagerService.AddUserToChatroomAsync(id, user);
+                await _chatroomManagerService.AddUserToChatroomAsync(new AddUserToChatroomModel
+                {
+                    ChatroomId = id,
+                    UserId = user.Id,
+                });
                 return Ok();
             }
             catch (Exception ex)
