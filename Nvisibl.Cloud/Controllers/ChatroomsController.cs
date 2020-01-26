@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Logging;
 using Nvisibl.Cloud.Models.Chatrooms;
 using Nvisibl.Cloud.Models.Users;
-using Nvisibl.Cloud.Services.Interfaces;
+using Nvisibl.Business.Interfaces;
 using System;
 using System.Threading.Tasks;
 
@@ -53,7 +53,7 @@ namespace Nvisibl.Cloud.Controllers
                 var chatroom = await _chatroomManagerService.GetChatroomAsync(id);
                 var chatroomUsers = includeUsers
                     ? await _chatroomManagerService.GetChatroomUsersAsync(id)
-                    : Array.Empty<UserModel>();
+                    : Array.Empty<Business.Models.Users.UserModel>();
                 return new JsonResult(new
                 {
                     chatroom.Id,
@@ -78,7 +78,12 @@ namespace Nvisibl.Cloud.Controllers
         {
             try
             {
-                var chatroom = await _chatroomManagerService.CreateChatroomAsync(createChatroomModel);
+                var chatroom = await _chatroomManagerService.CreateChatroomAsync(
+                    new Business.Models.Chatrooms.CreateChatroomModel
+                    {
+                        ChatroomName = createChatroomModel.ChatroomName,
+                        OwnerId = createChatroomModel.OwnerId,
+                    });
                 return chatroom is { }
                     ? new JsonResult(chatroom)
                     : (ActionResult)BadRequest();
@@ -109,20 +114,23 @@ namespace Nvisibl.Cloud.Controllers
         [HttpPost("{id}/users")]
         public async Task<ActionResult> AddUserAsync(
             int id,
-            [FromBody] UserModel user)
+            [FromBody] AddUserToChatroomModel addUserToChatroomModel)
         {
             try
             {
-                await _chatroomManagerService.AddUserToChatroomAsync(new AddUserToChatroomModel
-                {
-                    ChatroomId = id,
-                    UserId = user.Id,
-                });
+                await _chatroomManagerService.AddUserToChatroomAsync(
+                    new Business.Models.Chatrooms.AddUserToChatroomModel
+                    {
+                        ChatroomId = id,
+                        UserId = addUserToChatroomModel.UserId,
+                    });
                 return Ok();
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, $"Could not add user with id ({user.Id}) to chatroom with id ({id}).");
+                _logger.LogWarning(
+                    ex,
+                    $"Could not add user with id ({addUserToChatroomModel.UserId}) to chatroom with id ({id}).");
                 return BadRequest();
             }
         }

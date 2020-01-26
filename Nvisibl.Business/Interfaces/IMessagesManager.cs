@@ -1,8 +1,8 @@
-﻿using Nvisibl.Cloud.Models.Messages;
+﻿using Nvisibl.Business.Models.Messages;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Nvisibl.Cloud.Services.Interfaces
+namespace Nvisibl.Business.Interfaces
 {
     public interface IMessagesManager
     {

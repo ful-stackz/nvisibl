@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Nvisibl.Cloud.Services.Interfaces;
+using Nvisibl.Business.Interfaces;
 using Nvisibl.Cloud.WebSockets;
 using Nvisibl.Cloud.WebSockets.Interfaces;
 using Nvisibl.Cloud.WebSockets.Messages.Client;

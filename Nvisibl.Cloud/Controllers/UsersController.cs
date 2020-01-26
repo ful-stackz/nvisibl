@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using Nvisibl.Cloud.Services.Interfaces;
+using Nvisibl.Business.Interfaces;
 using Nvisibl.Cloud.Models.Users;
 
 namespace Nvisibl.Cloud.Controllers
@@ -55,7 +55,9 @@ namespace Nvisibl.Cloud.Controllers
                 {
                     user.Id,
                     user.Username,
-                    Friends = includeFriends ? await _userManager.GetUserFriendsAsync(id) : Array.Empty<UserModel>(),
+                    Friends = includeFriends
+                        ? await _userManager.GetUserFriendsAsync(id)
+                        : Array.Empty<Business.Models.Users.UserModel>(),
                 });
             }
             catch (Exception ex)
@@ -85,7 +87,12 @@ namespace Nvisibl.Cloud.Controllers
         {
             try
             {
-                return new JsonResult(await _userManager.CreateUserAsync(createUserModel));
+                return new JsonResult(
+                    await _userManager.CreateUserAsync(
+                        new Business.Models.Users.CreateUserModel
+                        {
+                            Username = createUserModel.Username,
+                        }));
             }
             catch (Exception ex)
             {
@@ -97,16 +104,20 @@ namespace Nvisibl.Cloud.Controllers
         [HttpPost("{id}/friends")]
         public async Task<ActionResult> AddFriendAsync(
             int id,
-            [FromBody] UserModel friend)
+            [FromBody] AddUserFriendModel addUserFriendModel)
         {
             try
             {
-                await _userManager.AddUserFriendAsync(new UserModel { Id = id }, friend);
+                await _userManager.AddUserFriendAsync(new Business.Models.Users.AddUserFriendModel
+                {
+                    FriendId = addUserFriendModel.UserId,
+                    UserId = id,
+                });
                 return NoContent();
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, $"Could not add user ({friend.Id}) as friend to user ({id}).");
+                _logger.LogWarning(ex, $"Could not add user ({addUserFriendModel.UserId}) as friend to user ({id}).");
                 return BadRequest();
             }
         }

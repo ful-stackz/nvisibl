@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Nvisibl.Cloud.Models.Messages;
-using Nvisibl.Cloud.Services.Interfaces;
+using Nvisibl.Business.Interfaces;
 using System;
 using System.Threading.Tasks;
 
@@ -26,7 +26,15 @@ namespace Nvisibl.Cloud.Controllers
         {
             try
             {
-                return new JsonResult(await _messagesManagerService.CreateMessageAsync(createMessageModel));
+                return new JsonResult(
+                    await _messagesManagerService.CreateMessageAsync(
+                        new Business.Models.Messages.CreateMessageModel
+                        {
+                            AuthorId = createMessageModel.AuthorId,
+                            Body = createMessageModel.Body,
+                            ChatroomId = createMessageModel.ChatroomId,
+                            TimeSentUtc = createMessageModel.TimeSentUtc,
+                        }));
             }
             catch (Exception ex)
             {

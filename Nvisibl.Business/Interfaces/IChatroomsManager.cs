@@ -1,9 +1,9 @@
-﻿using Nvisibl.Cloud.Models.Chatrooms;
-using Nvisibl.Cloud.Models.Users;
+﻿using Nvisibl.Business.Models.Chatrooms;
+using Nvisibl.Business.Models.Users;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Nvisibl.Cloud.Services.Interfaces
+namespace Nvisibl.Business.Interfaces
 {
     public interface IChatroomsManager
     {

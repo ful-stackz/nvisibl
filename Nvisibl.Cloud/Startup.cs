@@ -1,6 +1,5 @@
 using System;
 using Nvisibl.Cloud.Helpers;
-using Nvisibl.Cloud.Services;
 using Nvisibl.DataLibrary.Contexts;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -9,7 +8,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Nvisibl.Cloud.Services.Interfaces;
 using Nvisibl.DataLibrary.Repositories;
 using Nvisibl.DataLibrary.Repositories.Interfaces;
 using Nvisibl.Cloud.Middleware;
@@ -17,6 +15,8 @@ using Nvisibl.Cloud.WebSockets.Interfaces;
 using Nvisibl.Cloud.WebSockets;
 using Nvisibl.Cloud.WebSockets.Messages.Interfaces;
 using Nvisibl.Cloud.WebSockets.Messages;
+using Nvisibl.Business.Interfaces;
+using Nvisibl.Business;
 
 namespace Nvisibl.Cloud
 {

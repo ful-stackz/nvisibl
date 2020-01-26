@@ -1,6 +1,6 @@
-﻿using Nvisibl.Cloud.Models;
-using Nvisibl.Cloud.Models.Messages;
-using Nvisibl.Cloud.Services.Interfaces;
+﻿using Nvisibl.Business.Models;
+using Nvisibl.Business.Models.Messages;
+using Nvisibl.Business.Interfaces;
 using Nvisibl.DataLibrary.Models;
 using Nvisibl.DataLibrary.Repositories.Interfaces;
 using System;
@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Nvisibl.Cloud.Services
+namespace Nvisibl.Business
 {
     public class MessagesManager : IMessagesManager, IDisposable
     {

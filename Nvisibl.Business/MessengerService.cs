@@ -1,12 +1,12 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using Nvisibl.Cloud.Models.Messages;
-using Nvisibl.Cloud.Services.Interfaces;
+using Nvisibl.Business.Models.Messages;
+using Nvisibl.Business.Interfaces;
 using System;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading.Tasks;
 
-namespace Nvisibl.Cloud.Services
+namespace Nvisibl.Business
 {
     public class MessengerService : IMessengerService
     {

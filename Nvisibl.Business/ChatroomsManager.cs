@@ -1,7 +1,7 @@
-﻿using Nvisibl.Cloud.Models;
-using Nvisibl.Cloud.Models.Chatrooms;
-using Nvisibl.Cloud.Models.Users;
-using Nvisibl.Cloud.Services.Interfaces;
+﻿using Nvisibl.Business.Models;
+using Nvisibl.Business.Models.Chatrooms;
+using Nvisibl.Business.Models.Users;
+using Nvisibl.Business.Interfaces;
 using Nvisibl.DataLibrary.Models;
 using Nvisibl.DataLibrary.Repositories.Interfaces;
 using System;
@@ -9,7 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Nvisibl.Cloud.Services
+namespace Nvisibl.Business
 {
     public class ChatroomsManager : IChatroomsManager, IDisposable
     {

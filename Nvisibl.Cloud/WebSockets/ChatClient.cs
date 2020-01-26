@@ -1,6 +1,5 @@
-﻿using Nvisibl.Cloud.Models.Messages;
-using Nvisibl.Cloud.Models.Users;
-using Nvisibl.Cloud.Services.Interfaces;
+﻿using Nvisibl.Business.Interfaces;
+using Nvisibl.Cloud.Models.Messages;
 using Nvisibl.Cloud.WebSockets.Interfaces;
 using System;
 using System.Linq;
@@ -41,15 +40,16 @@ namespace Nvisibl.Cloud.WebSockets
                 webSocketSession.ReceivedMessages
                 .Where(msg => msg is Messages.Client.ChatroomMessageMessage)
                 .OfType<Messages.Client.ChatroomMessageMessage>()
-                .Subscribe(async msg => await messengerService.SendMessageAsync(new CreateMessageModel
-                {
-                    AuthorId = msg.AuthorId,
-                    Body = msg.Body,
-                    ChatroomId = msg.ChatroomId,
-                    TimeSentUtc = msg.TimeSentUtc,
-                })));
+                .Subscribe(async msg => await messengerService.SendMessageAsync(
+                    new Business.Models.Messages.CreateMessageModel
+                    {
+                        AuthorId = msg.AuthorId,
+                        Body = msg.Body,
+                        ChatroomId = msg.ChatroomId,
+                        TimeSentUtc = msg.TimeSentUtc,
+                    })));
 
-            var chatrooms = chatroomsManager.GetUserChatroomsAsync(new UserModel { Id = userId })
+            var chatrooms = chatroomsManager.GetUserChatroomsAsync(new Business.Models.Users.UserModel { Id = userId })
                 .GetAwaiter()
                 .GetResult()
                 .Select(chatroom => chatroom.Id)

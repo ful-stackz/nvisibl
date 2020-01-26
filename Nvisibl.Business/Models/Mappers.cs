@@ -1,19 +1,12 @@
-﻿using Nvisibl.Cloud.Models.Chatrooms;
-using Nvisibl.Cloud.Models.Messages;
-using Nvisibl.Cloud.Models.Users;
+﻿using Nvisibl.Business.Models.Chatrooms;
+using Nvisibl.Business.Models.Messages;
+using Nvisibl.Business.Models.Users;
 using Nvisibl.DataLibrary.Models;
 
-namespace Nvisibl.Cloud.Models
+namespace Nvisibl.Business.Models
 {
     internal static class Mappers
     {
-        internal static UserModel ToUserModel(User user) =>
-            new UserModel
-            {
-                Id = user.Id,
-                Username = user.Username,
-            };
-
         internal static ChatroomModel ToChatroomModel(Chatroom chatroom) =>
             new ChatroomModel
             {
@@ -29,6 +22,13 @@ namespace Nvisibl.Cloud.Models
                 ChatroomId = message.ChatroomId,
                 Id = message.Id,
                 TimeSentUtc = message.TimeSentUtc,
+            };
+
+        internal static UserModel ToUserModel(User user) =>
+            new UserModel
+            {
+                Id = user.Id,
+                Username = user.Username,
             };
     }
 }

@@ -1,6 +1,6 @@
-﻿using Nvisibl.Cloud.Models;
-using Nvisibl.Cloud.Models.Users;
-using Nvisibl.Cloud.Services.Interfaces;
+﻿using Nvisibl.Business.Models;
+using Nvisibl.Business.Models.Users;
+using Nvisibl.Business.Interfaces;
 using Nvisibl.DataLibrary.Models;
 using Nvisibl.DataLibrary.Repositories.Interfaces;
 using System;
@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Nvisibl.Cloud.Services
+namespace Nvisibl.Business
 {
     public class UsersManager : IUsersManager
     {
@@ -96,30 +96,25 @@ namespace Nvisibl.Cloud.Services
                 .ToList();
         }
 
-        public async Task AddUserFriendAsync(UserModel userModel, UserModel friendUserModel)
+        public async Task AddUserFriendAsync(AddUserFriendModel addUserFriendModel)
         {
             if (_isDisposed)
             {
                 throw new ObjectDisposedException(GetType().Name);
             }
 
-            if (userModel is null)
+            if (addUserFriendModel is null)
             {
-                throw new ArgumentNullException(nameof(userModel));
+                throw new ArgumentNullException(nameof(addUserFriendModel));
             }
 
-            if (friendUserModel is null)
-            {
-                throw new ArgumentNullException(nameof(friendUserModel));
-            }
-
-            await EnsureUserExistsAsync(userModel.Id);
-            await EnsureUserExistsAsync(friendUserModel.Id);
+            await EnsureUserExistsAsync(addUserFriendModel.UserId);
+            await EnsureUserExistsAsync(addUserFriendModel.FriendId);
 
             await _unitOfWork.GetRepository<IFriendsRepository>().AddAsync(new Friend
             {
-                User1Id = userModel.Id,
-                User2Id = friendUserModel.Id,
+                User1Id = addUserFriendModel.UserId,
+                User2Id = addUserFriendModel.FriendId,
             });
             _ = await _unitOfWork.CompleteAsync();
         }
