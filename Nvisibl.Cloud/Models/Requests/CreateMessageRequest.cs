@@ -1,13 +1,10 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 
-namespace Nvisibl.Cloud.Models.Messages
+namespace Nvisibl.Cloud.Models.Requests
 {
-    public class MessageModel
+    public class CreateMessageRequest
     {
-        [Required]
-        public int Id { get; set; }
-
         [Required]
         public int AuthorId { get; set; }
 

@@ -1,20 +1,14 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 
-namespace Nvisibl.Cloud.Models.Messages
+namespace Nvisibl.Cloud.Models.Responses
 {
-    public class CreateMessageModel
+    public class MessageResponse
     {
-        [Required]
         public int AuthorId { get; set; }
-
-        [Required]
-        public int ChatroomId { get; set; }
-
-        [Required]
         public string Body { get; set; } = string.Empty;
-
-        [Required]
+        public int ChatroomId { get; set; }
+        public int Id { get; set; }
         public DateTime TimeSentUtc { get; set; }
     }
 }

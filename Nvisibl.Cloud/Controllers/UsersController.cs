@@ -1,9 +1,12 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Nvisibl.Business.Interfaces;
-using Nvisibl.Cloud.Models.Users;
+using Nvisibl.Business.Models.Users;
+using Nvisibl.Cloud.Models.Requests;
+using Nvisibl.Cloud.Models.Responses;
 
 namespace Nvisibl.Cloud.Controllers
 {
@@ -27,7 +30,13 @@ namespace Nvisibl.Cloud.Controllers
         {
             try
             {
-                return new JsonResult(await _userManager.GetUsersAsync(page, pageSize));
+                var users = await _userManager.GetUsersAsync(page, pageSize);
+                return new JsonResult(
+                    users.Select(user => new BasicUserResponse
+                    {
+                        Id = user.Id,
+                        Username = user.Username,
+                    }));
             }
             catch (Exception ex)
             {
@@ -51,13 +60,19 @@ namespace Nvisibl.Cloud.Controllers
                     return NotFound();
                 }
 
-                return new JsonResult(new
+                var friends = includeFriends
+                    ? (await _userManager.GetUserFriendsAsync(id)).Select(f => new BasicUserResponse
+                    {
+                        Id = f.Id,
+                        Username = f.Username,
+                    }).ToList()
+                    : Enumerable.Empty<BasicUserResponse>().ToList();
+
+                return new JsonResult(new UserResponse
                 {
-                    user.Id,
-                    user.Username,
-                    Friends = includeFriends
-                        ? await _userManager.GetUserFriendsAsync(id)
-                        : Array.Empty<Business.Models.Users.UserModel>(),
+                    Id = user.Id,
+                    Username = user.Username,
+                    Friends = friends,
                 });
             }
             catch (Exception ex)
@@ -72,7 +87,12 @@ namespace Nvisibl.Cloud.Controllers
         {
             try
             {
-                return new JsonResult(await _userManager.GetUserFriendsAsync(id));
+                var friends = await _userManager.GetUserFriendsAsync(id);
+                return new JsonResult(friends.Select(user => new BasicUserResponse
+                {
+                    Id = user.Id,
+                    Username = user.Username,
+                }));
             }
             catch (Exception ex)
             {
@@ -83,20 +103,23 @@ namespace Nvisibl.Cloud.Controllers
 
         [HttpPost]
         public async Task<ActionResult> CreateAsync(
-            [FromBody] CreateUserModel createUserModel)
+            [FromBody] CreateUserRequest request)
         {
             try
             {
-                return new JsonResult(
-                    await _userManager.CreateUserAsync(
-                        new Business.Models.Users.CreateUserModel
-                        {
-                            Username = createUserModel.Username,
-                        }));
+                var user = await _userManager.CreateUserAsync(new CreateUserModel
+                {
+                    Username = request.Username,
+                });
+                return new JsonResult(new BasicUserResponse
+                {
+                    Id = user.Id,
+                    Username = user.Username,
+                });
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, $"Could not create new user record. {createUserModel.Username}");
+                _logger.LogWarning(ex, $"Could not create new user record. {request.Username}");
                 return BadRequest();
             }
         }
@@ -104,20 +127,20 @@ namespace Nvisibl.Cloud.Controllers
         [HttpPost("{id}/friends")]
         public async Task<ActionResult> AddFriendAsync(
             int id,
-            [FromBody] AddUserFriendModel addUserFriendModel)
+            [FromBody] AddFriendRequest request)
         {
             try
             {
-                await _userManager.AddUserFriendAsync(new Business.Models.Users.AddUserFriendModel
+                await _userManager.AddUserFriendAsync(new AddUserFriendModel
                 {
-                    FriendId = addUserFriendModel.UserId,
+                    FriendId = request.UserId,
                     UserId = id,
                 });
                 return NoContent();
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, $"Could not add user ({addUserFriendModel.UserId}) as friend to user ({id}).");
+                _logger.LogWarning(ex, $"Could not add user ({request.UserId}) as friend to user ({id}).");
                 return BadRequest();
             }
         }

@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Nvisibl.Cloud.Models.Chatrooms
+namespace Nvisibl.Cloud.Models.Requests
 {
-    public class AddUserToChatroomModel
+    public class AddUserToChatroomRequest
     {
         [Required]
         public int UserId { get; set; }

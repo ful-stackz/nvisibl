@@ -18,10 +18,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Services\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\Nvisibl.Business\Nvisibl.Business.csproj" />
     <ProjectReference Include="..\Nvisibl.DataLibrary\Nvisibl.DataLibrary.csproj" />
   </ItemGroup>

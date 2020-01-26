@@ -1,9 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using Nvisibl.Cloud.Models.Messages;
 using Nvisibl.Business.Interfaces;
 using System;
 using System.Threading.Tasks;
+using Nvisibl.Cloud.Models.Requests;
+using Nvisibl.Cloud.Models.Responses;
+using Nvisibl.Business.Models.Messages;
 
 namespace Nvisibl.Cloud.Controllers
 {
@@ -22,26 +24,33 @@ namespace Nvisibl.Cloud.Controllers
 
         [HttpPost]
         public async Task<ActionResult> CreateAsync(
-            [FromBody] CreateMessageModel createMessageModel)
+            [FromBody] CreateMessageRequest request)
         {
             try
             {
-                return new JsonResult(
-                    await _messagesManagerService.CreateMessageAsync(
-                        new Business.Models.Messages.CreateMessageModel
-                        {
-                            AuthorId = createMessageModel.AuthorId,
-                            Body = createMessageModel.Body,
-                            ChatroomId = createMessageModel.ChatroomId,
-                            TimeSentUtc = createMessageModel.TimeSentUtc,
-                        }));
+                var message = await _messagesManagerService.CreateMessageAsync(
+                    new CreateMessageModel
+                    {
+                        AuthorId = request.AuthorId,
+                        Body = request.Body,
+                        ChatroomId = request.ChatroomId,
+                        TimeSentUtc = request.TimeSentUtc,
+                    });
+                return new JsonResult(new MessageResponse
+                {
+                    AuthorId = message.AuthorId,
+                    Body = message.Body,
+                    ChatroomId = message.ChatroomId,
+                    Id = message.Id,
+                    TimeSentUtc = message.TimeSentUtc,
+                });
             }
             catch (Exception ex)
             {
                 _logger.LogWarning(
                     ex,
-                    $"Could add message from user with id ({createMessageModel.AuthorId}) to chatroom with " +
-                    $"id ({createMessageModel.ChatroomId}).");
+                    $"Could add message from user with id ({request.AuthorId}) to chatroom with " +
+                    $"id ({request.ChatroomId}).");
                 return BadRequest();
             }
         }

@@ -1,4 +1,4 @@
-﻿using Nvisibl.Cloud.Models.Messages;
+﻿using Nvisibl.Business.Models.Messages;
 
 namespace Nvisibl.Cloud.WebSockets.Interfaces
 {

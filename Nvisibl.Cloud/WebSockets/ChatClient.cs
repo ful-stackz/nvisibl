@@ -1,5 +1,5 @@
 ﻿using Nvisibl.Business.Interfaces;
-using Nvisibl.Cloud.Models.Messages;
+using Nvisibl.Business.Models.Messages;
 using Nvisibl.Cloud.WebSockets.Interfaces;
 using System;
 using System.Linq;
@@ -41,7 +41,7 @@ namespace Nvisibl.Cloud.WebSockets
                 .Where(msg => msg is Messages.Client.ChatroomMessageMessage)
                 .OfType<Messages.Client.ChatroomMessageMessage>()
                 .Subscribe(async msg => await messengerService.SendMessageAsync(
-                    new Business.Models.Messages.CreateMessageModel
+                    new CreateMessageModel
                     {
                         AuthorId = msg.AuthorId,
                         Body = msg.Body,

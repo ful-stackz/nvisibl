@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Nvisibl.Cloud.Models.Chatrooms
+namespace Nvisibl.Cloud.Models.Requests
 {
-    public class CreateChatroomModel
+    public class CreateChatroomRequest
     {
         [Required]
         public int OwnerId { get; set; }
