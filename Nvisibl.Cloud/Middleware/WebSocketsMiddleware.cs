@@ -4,7 +4,6 @@ using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Nvisibl.Cloud.WebSockets;
@@ -27,19 +26,19 @@ namespace Nvisibl.Cloud.Middleware
 
         public WebSocketsMiddleware(RequestDelegate next)
         {
-            _next = next;
+            _next = next ?? throw new ArgumentNullException(nameof(next));
         }
 
-        public async Task Invoke(HttpContext httpContext, IWebHostEnvironment hostEnvironment)
+        public async Task Invoke(
+            HttpContext httpContext,
+            IWebHostEnvironment hostEnvironment,
+            IChatClientManager chatClientManager,
+            IMessageParser messageParser,
+            ILogger<WebSocketSession> logger)
         {
             if (httpContext is null)
             {
                 throw new ArgumentNullException(nameof(httpContext));
-            }
-
-            if (hostEnvironment is null)
-            {
-                throw new ArgumentNullException(nameof(hostEnvironment));
             }
 
             if (!httpContext.WebSockets.IsWebSocketRequest || httpContext.Request.Path != ChatClientEndpoint)
@@ -48,14 +47,29 @@ namespace Nvisibl.Cloud.Middleware
                 return;
             }
 
+            if (hostEnvironment is null)
+            {
+                throw new ArgumentNullException(nameof(hostEnvironment));
+            }
+
+            if (chatClientManager is null)
+            {
+                throw new ArgumentNullException(nameof(chatClientManager));
+            }
+
+            if (messageParser is null)
+            {
+                throw new ArgumentNullException(nameof(messageParser));
+            }
+
+            if (logger is null)
+            {
+                throw new ArgumentNullException(nameof(logger));
+            }
+
             var webSocket = await httpContext.WebSockets.AcceptWebSocketAsync();
 
-            var serviceProvider = httpContext.RequestServices;
-
-            using var webSocketSession = new WebSocketSession(
-                webSocket,
-                serviceProvider.GetService<IMessageParser>(),
-                serviceProvider.GetService<ILogger<WebSocketSession>>());
+            using var webSocketSession = new WebSocketSession(webSocket, messageParser, logger);
 
             var connectionRequest = webSocketSession.ReceivedMessages
                 .Where(msg => msg is ConnectionRequestMessage)
@@ -72,24 +86,16 @@ namespace Nvisibl.Cloud.Middleware
                 return;
             }
 
-            var clientManager = serviceProvider.GetService<IChatClientManager>();
-            if (clientManager is null)
-            {
-                httpContext.Response.StatusCode = StatusCodes.Status500InternalServerError;
-                await httpContext.Response.CompleteAsync();
-                return;
-            }
-
             var sessionId = Guid.NewGuid();
             var chatClient = new ChatClient(connectionRequest.UserId, sessionId, webSocketSession);
 
             webSocketSession.EnqueueMessage(new ConnectedMessage { SessionId = sessionId, });
 
-            clientManager.AddClient(chatClient);
+            chatClientManager.AddClient(chatClient);
 
             await webSocketSession.Lifetime.Task;
 
-            clientManager.RemoveClient(client => client.UserId == chatClient.UserId);
+            chatClientManager.RemoveClient(client => client.UserId == chatClient.UserId);
         }
     }
 }
