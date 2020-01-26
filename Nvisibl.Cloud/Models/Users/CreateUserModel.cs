@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Nvisibl.Cloud.Models
+namespace Nvisibl.Cloud.Models.Users
 {
     public class CreateUserModel
     {

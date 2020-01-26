@@ -38,14 +38,15 @@ namespace Nvisibl.Cloud
                     ConnectionStringHelper.GetConnectionString(Configuration)));
 
             services.AddTransient<IUnitOfWork, UnitOfWork>();
-            services.AddTransient<IUserManagerService, UserManagerService>();
-            services.AddTransient<IChatroomManagerService, ChatroomManagerService>();
-            services.AddTransient<IMessagesManagerService, MessagesManagerService>();
+            services.AddTransient<IUsersManager, UsersManager>();
+            services.AddTransient<IChatroomsManager, ChatroomsManager>();
+            services.AddTransient<IMessagesManager, MessagesManager>();
 
+            services.AddSingleton<IMessengerService, MessengerService>();
             services.AddSingleton<IMessageParser, MessageParser>();
-            services.AddSingleton<ClientManager>();
-            services.AddSingleton<IChatClientManager>(sp => sp.GetService<ClientManager>());
-            services.AddSingleton<INotificationClientManager>(sp => sp.GetService<ClientManager>());
+            services.AddSingleton<ClientsManager>();
+            services.AddSingleton<IChatClientsManager>(sp => sp.GetService<ClientsManager>());
+            services.AddSingleton<INotificationClientManager>(sp => sp.GetService<ClientsManager>());
 
             services.AddControllers();
         }

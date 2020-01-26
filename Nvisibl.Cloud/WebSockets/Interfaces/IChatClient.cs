@@ -1,11 +1,9 @@
-﻿using System;
+﻿using Nvisibl.Cloud.Models.Messages;
 
 namespace Nvisibl.Cloud.WebSockets.Interfaces
 {
     public interface IChatClient : IClient
     {
-        IObservable<Messages.Client.ChatroomMessageMessage> ReceivedMessages { get; }
-
-        void SendMessage(Messages.Server.ChatroomMessageMessage message);
+        void SendMessage(MessageModel message);
     }
 }

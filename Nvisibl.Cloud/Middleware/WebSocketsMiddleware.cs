@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Nvisibl.Cloud.Services.Interfaces;
 using Nvisibl.Cloud.WebSockets;
 using Nvisibl.Cloud.WebSockets.Interfaces;
 using Nvisibl.Cloud.WebSockets.Messages.Client;
@@ -23,17 +24,33 @@ namespace Nvisibl.Cloud.Middleware
         private const string ChatClientEndpoint = "/ws/chat";
 
         private readonly RequestDelegate _next;
+        private readonly IChatClientsManager _chatClientsManager;
+        private readonly IMessageParser _messageParser;
+        private readonly IMessengerService _messengerService;
+        private readonly TimeSpan _connectionTimeout;
 
-        public WebSocketsMiddleware(RequestDelegate next)
+        public WebSocketsMiddleware(
+            RequestDelegate next,
+            IWebHostEnvironment hostEnvironment,
+            IChatClientsManager chatClientsManager,
+            IMessageParser messageParser,
+            IMessengerService messengerService)
         {
+            if (hostEnvironment is null)
+            {
+                throw new ArgumentNullException(nameof(hostEnvironment));
+            }
+
             _next = next ?? throw new ArgumentNullException(nameof(next));
+            _chatClientsManager = chatClientsManager ?? throw new ArgumentNullException(nameof(chatClientsManager));
+            _messageParser = messageParser ?? throw new ArgumentNullException(nameof(messageParser));
+            _messengerService = messengerService ?? throw new ArgumentNullException(nameof(messengerService));
+            _connectionTimeout = hostEnvironment.IsDevelopment() ? DevConnectionTimeout : DefaultConnectionTimeout;
         }
 
         public async Task Invoke(
             HttpContext httpContext,
-            IWebHostEnvironment hostEnvironment,
-            IChatClientManager chatClientManager,
-            IMessageParser messageParser,
+            IChatroomsManager chatroomsManager,
             ILogger<WebSocketSession> logger)
         {
             if (httpContext is null)
@@ -41,25 +58,15 @@ namespace Nvisibl.Cloud.Middleware
                 throw new ArgumentNullException(nameof(httpContext));
             }
 
+            if (chatroomsManager is null)
+            {
+                throw new ArgumentNullException(nameof(chatroomsManager));
+            }
+
             if (!httpContext.WebSockets.IsWebSocketRequest || httpContext.Request.Path != ChatClientEndpoint)
             {
                 await _next(httpContext);
                 return;
-            }
-
-            if (hostEnvironment is null)
-            {
-                throw new ArgumentNullException(nameof(hostEnvironment));
-            }
-
-            if (chatClientManager is null)
-            {
-                throw new ArgumentNullException(nameof(chatClientManager));
-            }
-
-            if (messageParser is null)
-            {
-                throw new ArgumentNullException(nameof(messageParser));
             }
 
             if (logger is null)
@@ -69,13 +76,11 @@ namespace Nvisibl.Cloud.Middleware
 
             var webSocket = await httpContext.WebSockets.AcceptWebSocketAsync();
 
-            using var webSocketSession = new WebSocketSession(webSocket, messageParser, logger);
+            using var webSocketSession = new WebSocketSession(webSocket, _messageParser, logger);
 
             var connectionRequest = webSocketSession.ReceivedMessages
                 .Where(msg => msg is ConnectionRequestMessage)
-                .Timeout(
-                    hostEnvironment.IsDevelopment() ? DevConnectionTimeout : DefaultConnectionTimeout,
-                    Observable.Return(ClientMessageBase.Empty))
+                .Timeout(_connectionTimeout, Observable.Return(ClientMessageBase.Empty))
                 .Take(1)
                 .Wait() as ConnectionRequestMessage;
 
@@ -87,15 +92,20 @@ namespace Nvisibl.Cloud.Middleware
             }
 
             var sessionId = Guid.NewGuid();
-            var chatClient = new ChatClient(connectionRequest.UserId, sessionId, webSocketSession);
+            var chatClient = new ChatClient(
+                connectionRequest.UserId,
+                sessionId,
+                webSocketSession,
+                chatroomsManager,
+                _messengerService);
 
             webSocketSession.EnqueueMessage(new ConnectedMessage { SessionId = sessionId, });
 
-            chatClientManager.AddClient(chatClient);
+            _chatClientsManager.AddClient(chatClient);
 
             await webSocketSession.Lifetime.Task;
 
-            chatClientManager.RemoveClient(client => client.UserId == chatClient.UserId);
+            _chatClientsManager.RemoveClient(client => client.UserId == chatClient.UserId);
         }
     }
 }

@@ -1,14 +1,11 @@
-﻿using Nvisibl.Cloud.Models;
-using System;
+﻿using Nvisibl.Cloud.Models.Messages;
 
 namespace Nvisibl.Cloud.WebSockets.Messages
 {
     internal static class Mappers
     {
         internal static CreateMessageModel ToCreateMessageModel(Client.ChatroomMessageMessage message) =>
-            message is null
-            ? throw new ArgumentNullException(nameof(message))
-            : new CreateMessageModel
+            new CreateMessageModel
             {
                 AuthorId = message.AuthorId,
                 Body = message.Body,
