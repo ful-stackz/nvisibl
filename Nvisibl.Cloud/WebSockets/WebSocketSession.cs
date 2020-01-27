@@ -136,14 +136,6 @@ namespace Nvisibl.Cloud.WebSockets
             {
                 if (isDisposing)
                 {
-                    if (_incomingMessagesProcessor.IsAlive)
-                    {
-                        _incomingMessagesProcessor.Abort();
-                    }
-                    if (_outgoingMessagesProcessor.IsAlive)
-                    {
-                        _outgoingMessagesProcessor.Abort();
-                    }
                     _receivedMessagesSubject.Dispose();
                 }
                 _isDisposed = true;

@@ -56,7 +56,7 @@ namespace Nvisibl.Cloud.WebSockets
                 .ToList();
             _subscriptions.Add(
                 messengerService.DispatchedMessages
-                .Where(msg => msg.AuthorId != UserId && !chatrooms.Contains(msg.ChatroomId))
+                .Where(msg => msg.AuthorId != UserId && chatrooms.Contains(msg.ChatroomId))
                 .Subscribe(msg => webSocketSession.EnqueueMessage(new Messages.Server.ChatroomMessageMessage
                 {
                     AuthorId = msg.AuthorId,

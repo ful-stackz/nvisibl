@@ -34,7 +34,7 @@ namespace Nvisibl.Cloud
             services.AddLogging(options => options.AddConsole());
 
             services.AddDbContext<ChatContext>(
-                options => options.UseSqlServer(
+                options => options.UseMySql(
                     ConnectionStringHelper.GetConnectionString(Configuration)));
 
             services.AddTransient<IUnitOfWork, UnitOfWork>();
@@ -58,15 +58,15 @@ namespace Nvisibl.Cloud
                 app.UseDeveloperExceptionPage();
             }
 
-            app.UseWebSockets();
-
-            app.UseWebSocketsMiddleware();
-
             app.UseHttpsRedirection();
 
             app.UseRouting();
 
             app.UseAuthorization();
+
+            app.UseWebSockets();
+
+            app.UseWebSocketsMiddleware();
 
             app.UseEndpoints(endpoints =>
             {
