@@ -47,7 +47,7 @@ namespace Nvisibl.Cloud.WebSockets
                 {
                     var received = new List<byte[]>(4);
                     byte[] buffer = new byte[1024 * 4];
-                    while (webSocket.State == WebSocketState.Open)
+                    while (!_isDisposed && !webSocket.CloseStatus.HasValue && webSocket.State == WebSocketState.Open)
                     {
                         var result = webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None)
                             .GetAwaiter()
@@ -57,7 +57,10 @@ namespace Nvisibl.Cloud.WebSockets
                         {
                             var messageRaw = Encoding.UTF8.GetString(received.SelectMany(x => x).ToArray());
                             var message = messageParser.DeserializeClientMessage(messageRaw);
-                            _receivedMessagesSubject.OnNext(message);
+                            if (!_receivedMessagesSubject.IsDisposed)
+                            {
+                                _receivedMessagesSubject.OnNext(message);
+                            }
                             received.Clear();
                         }
                         Array.Clear(buffer, 0, buffer.Length);
@@ -66,15 +69,15 @@ namespace Nvisibl.Cloud.WebSockets
                 catch (WebSocketException ex)
                 {
                     logger.LogWarning(ex, $"WebSockets session terminated. Status: {ex.WebSocketErrorCode}.");
-                    if (!Lifetime.TrySetResult(new object()))
-                    {
-                        logger.LogError($"Could not set {nameof(Lifetime)} to complete.");
-                    }
+                }
+                finally
+                {
+                    _ = Lifetime.TrySetResult(new object());
                 }
             });
             _outgoingMessagesProcessor = new Thread(() =>
             {
-                while (webSocket.State == WebSocketState.Open)
+                while (!_isDisposed && !webSocket.CloseStatus.HasValue && webSocket.State == WebSocketState.Open)
                 {
                     if (!_outgoing.TryDequeue(out var message))
                     {
@@ -99,11 +102,8 @@ namespace Nvisibl.Cloud.WebSockets
                         logger.LogWarning(
                             exception: ex,
                             $"Could not send message over WebSockets. Status: {ex.WebSocketErrorCode}.");
-                        if (!Lifetime.TrySetResult(new object()))
-                        {
-                            logger.LogError($"Could not set {nameof(Lifetime)} to complete.");
-                        }
                     }
+                    _ = Lifetime.TrySetResult(new object());
                 }
             });
             _incomingMessagesProcessor.Start();
