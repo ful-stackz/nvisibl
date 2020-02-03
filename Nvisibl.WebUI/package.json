@@ -1,0 +1,44 @@
+{
+    "name": "nvisibl.webui",
+    "version": "1.0.0",
+    "description": "Web based client for Nvisibl.",
+    "main": "src/main.ts",
+    "scripts": {
+        "build": "npm run build:tailwind && rollup -c",
+        "autobuild": "rollup -c -w",
+        "dev": "run-p start:dev autobuild watch:tailwind",
+        "start": "sirv public --single --dev",
+        "start:dev": "sirv public --single --dev --port 5002 --cors",
+        "watch:tailwind": "postcss public/tailwind.css -o public/build/index.css -w",
+        "build:tailwind": "env NODE_ENV=production postcss public/tailwind.css -o public/build/index.css"
+    },
+    "author": "Ivan Stoyanov",
+    "license": "MIT",
+    "devDependencies": {
+        "@rollup/plugin-node-resolve": "^7.1.1",
+        "@typescript-eslint/eslint-plugin": "^2.19.0",
+        "@typescript-eslint/parser": "^2.19.0",
+        "eslint": "^6.8.0",
+        "eslint-config-airbnb-base": "^14.0.0",
+        "eslint-plugin-import": "^2.20.1",
+        "npm-run-all": "^4.1.5",
+        "postcss-cli": "^7.1.0",
+        "rollup": "^1.29.1",
+        "rollup-plugin-commonjs": "^10.1.0",
+        "rollup-plugin-livereload": "^1.0.4",
+        "rollup-plugin-svelte": "^5.1.1",
+        "rollup-plugin-terser": "^5.2.0",
+        "rollup-plugin-typescript2": "^0.25.3",
+        "typescript": "^3.7.5"
+    },
+    "dependencies": {
+        "@fullhuman/postcss-purgecss": "^2.0.5",
+        "axios": "^0.19.2",
+        "lockr": "^0.8.5",
+        "rxjs": "^6.5.4",
+        "sirv-cli": "^0.4.5",
+        "svelte": "^3.18.0",
+        "svelte-preprocess": "^3.3.1",
+        "tailwindcss": "^1.1.4"
+    }
+}
