@@ -18,6 +18,7 @@ using Nvisibl.Cloud.WebSockets.Messages;
 using Nvisibl.Business.Interfaces;
 using Nvisibl.Business;
 using Microsoft.AspNetCore.Identity;
+using Nvisibl.Cloud.Authentication;
 
 namespace Nvisibl.Cloud
 {
@@ -49,6 +50,17 @@ namespace Nvisibl.Cloud
                 })
                 .AddEntityFrameworkStores<AuthContext>()
                 .AddDefaultTokenProviders();
+
+            var jwtConfiguration = new JwtConfiguration(Configuration);
+            services.AddSingleton(jwtConfiguration);
+
+            services.AddAuthentication()
+                .AddJwtBearer(
+                    JwtSchemes.Admin,
+                    options => jwtConfiguration.ConfigureJwtBearerOptions(JwtSchemes.Admin, options))
+                .AddJwtBearer(
+                    JwtSchemes.User,
+                    options => jwtConfiguration.ConfigureJwtBearerOptions(JwtSchemes.User, options));
 
             services.AddTransient<IUnitOfWork, UnitOfWork>();
             services.AddTransient<IUsersManager, UsersManager>();
