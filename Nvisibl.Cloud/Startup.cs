@@ -33,6 +33,10 @@ namespace Nvisibl.Cloud
         {
             services.AddLogging(options => options.AddConsole());
 
+            services.AddDbContext<AuthContext>(
+                options => options.UseMySql(
+                    ConnectionStringHelper.GetConnectionString(Configuration)));
+
             services.AddDbContext<ChatContext>(
                 options => options.UseMySql(
                     ConnectionStringHelper.GetConnectionString(Configuration)));

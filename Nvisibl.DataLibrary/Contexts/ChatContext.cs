@@ -6,7 +6,7 @@ namespace Nvisibl.DataLibrary.Contexts
     public class ChatContext : DbContext
     {
 #pragma warning disable CS8618 // Non-nullable field is uninitialized. Consider declaring as nullable.
-        public ChatContext(DbContextOptions options)
+        public ChatContext(DbContextOptions<ChatContext> options)
 #pragma warning restore CS8618 // Non-nullable field is uninitialized. Consider declaring as nullable.
             : base(options)
         {
