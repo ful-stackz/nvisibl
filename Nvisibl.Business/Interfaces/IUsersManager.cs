@@ -10,6 +10,8 @@ namespace Nvisibl.Business.Interfaces
 
         Task<UserModel> GetUserAsync(int id);
 
+        Task<UserModel?> GetUserAsync(string username);
+
         Task<IEnumerable<UserModel>> GetUsersAsync(int page, int pageSize);
 
         Task<IEnumerable<UserModel>> GetUserFriendsAsync(int id);

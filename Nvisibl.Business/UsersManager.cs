@@ -55,6 +55,22 @@ namespace Nvisibl.Business
             return Mappers.ToUserModel(await _unitOfWork.GetRepository<IUserRepository>().GetAsync(id));
         }
 
+        public async Task<UserModel?> GetUserAsync(string username)
+        {
+            if (string.IsNullOrEmpty(username))
+            {
+                throw new ArgumentException("Argument was null or empty.", nameof(username));
+            }
+
+            return await Task.Run(() =>
+            {
+                var user = _unitOfWork.GetRepository<IUserRepository>()
+                    .Find(u => u.Username == username)
+                    .FirstOrDefault();
+                return user is null ? null : Mappers.ToUserModel(user);
+            });
+        }
+
         public async Task<IEnumerable<UserModel>> GetUsersAsync(int page = 0, int pageSize = 10)
         {
             if (_isDisposed)
