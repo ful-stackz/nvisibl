@@ -1,5 +1,4 @@
 ﻿using Nvisibl.Cloud.WebSockets.Messages.Client.Base;
-using System;
 
 namespace Nvisibl.Cloud.WebSockets.Messages.Client
 {
@@ -12,6 +11,6 @@ namespace Nvisibl.Cloud.WebSockets.Messages.Client
 
         public string Body { get; set; } = string.Empty;
 
-        public DateTime TimeSentUtc { get; set; }
+        public string TimeSentUtc { get; set; } = string.Empty;
     }
 }

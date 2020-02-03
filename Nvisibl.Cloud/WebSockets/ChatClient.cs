@@ -46,7 +46,7 @@ namespace Nvisibl.Cloud.WebSockets
                         AuthorId = msg.AuthorId,
                         Body = msg.Body,
                         ChatroomId = msg.ChatroomId,
-                        TimeSentUtc = msg.TimeSentUtc,
+                        TimeSentUtc = DateTime.Parse(msg.TimeSentUtc),
                     })));
 
             var chatrooms = chatroomsManager.GetUserChatroomsAsync(new Business.Models.Users.UserModel { Id = userId })
@@ -63,7 +63,7 @@ namespace Nvisibl.Cloud.WebSockets
                     Body = msg.Body,
                     ChatroomId = msg.ChatroomId,
                     MessageId = msg.Id,
-                    TimeSentUtc = msg.TimeSentUtc,
+                    TimeSentUtc = msg.TimeSentUtc.ToString("o"),
                 })));
         }
 
@@ -84,7 +84,7 @@ namespace Nvisibl.Cloud.WebSockets
                 Body = message.Body,
                 ChatroomId = message.ChatroomId,
                 MessageId = message.Id,
-                TimeSentUtc = message.TimeSentUtc,
+                TimeSentUtc = message.TimeSentUtc.ToString("o"),
             });
         }
 
