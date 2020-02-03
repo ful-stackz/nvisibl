@@ -17,6 +17,7 @@ using Nvisibl.Cloud.WebSockets.Messages.Interfaces;
 using Nvisibl.Cloud.WebSockets.Messages;
 using Nvisibl.Business.Interfaces;
 using Nvisibl.Business;
+using Microsoft.AspNetCore.Identity;
 
 namespace Nvisibl.Cloud
 {
@@ -40,6 +41,14 @@ namespace Nvisibl.Cloud
             services.AddDbContext<ChatContext>(
                 options => options.UseMySql(
                     ConnectionStringHelper.GetConnectionString(Configuration)));
+
+            services.AddIdentity<IdentityUser, IdentityRole>(
+                config =>
+                {
+                    config.Password.RequireNonAlphanumeric = false;
+                })
+                .AddEntityFrameworkStores<AuthContext>()
+                .AddDefaultTokenProviders();
 
             services.AddTransient<IUnitOfWork, UnitOfWork>();
             services.AddTransient<IUsersManager, UsersManager>();
