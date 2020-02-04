@@ -2,11 +2,13 @@
 using System.Linq;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Nvisibl.Business.Interfaces;
+using Nvisibl.Cloud.Authentication;
 using Nvisibl.Cloud.WebSockets;
 using Nvisibl.Cloud.WebSockets.Interfaces;
 using Nvisibl.Cloud.WebSockets.Messages.Client;
@@ -87,6 +89,16 @@ namespace Nvisibl.Cloud.Middleware
             if (connectionRequest is null)
             {
                 httpContext.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                await httpContext.Response.CompleteAsync();
+                return;
+            }
+
+            httpContext.Request.Headers.Add("Authorization", $"Bearer {connectionRequest.AccessToken}");
+            var authResults = await Task.WhenAll(
+                httpContext.AuthenticateAsync(JwtSchemes.Admin),
+                httpContext.AuthenticateAsync(JwtSchemes.User));                
+            if (authResults.All(result => !result.Succeeded))
+            {
                 await httpContext.Response.CompleteAsync();
                 return;
             }

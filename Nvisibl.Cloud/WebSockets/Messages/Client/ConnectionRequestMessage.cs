@@ -6,5 +6,6 @@ namespace Nvisibl.Cloud.WebSockets.Messages.Client
     public class ConnectionRequestMessage : ClientMessageBase
     {
         public int UserId { get; set; }
+        public string AccessToken { get; set; } = string.Empty;
     }
 }
