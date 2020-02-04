@@ -15,11 +15,19 @@ module.exports = {
         ecmaVersion: 2018,
         sourceType: 'module',
     },
+    settings: {
+        'import/resolver': {
+            'node': {
+                'extensions': [ '.js', '.ts' ],
+            },
+        },
+    },
     plugins: [
         '@typescript-eslint',
     ],
     rules: {
         'linebreak-style': 0,
-        'indent': ['error', 4, { 'SwitchCase': 1 }],
+        'indent': [ 'error', 4, { 'SwitchCase': 1 } ],
+        'import/extensions': [ 'error', 'ignorePackages', { 'js': 'never', 'ts': 'never' } ],
     },
 };
