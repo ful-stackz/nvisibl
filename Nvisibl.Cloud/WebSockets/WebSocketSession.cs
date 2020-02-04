@@ -103,8 +103,8 @@ namespace Nvisibl.Cloud.WebSockets
                             exception: ex,
                             $"Could not send message over WebSockets. Status: {ex.WebSocketErrorCode}.");
                     }
-                    _ = Lifetime.TrySetResult(new object());
                 }
+                _ = Lifetime.TrySetResult(new object());
             });
             _incomingMessagesProcessor.Start();
             _outgoingMessagesProcessor.Start();
