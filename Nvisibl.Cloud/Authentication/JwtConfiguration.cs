@@ -6,7 +6,7 @@ using System.Text;
 
 namespace Nvisibl.Cloud.Authentication
 {
-    internal class JwtConfiguration
+    public class JwtConfiguration
     {
         private const string SchemePostfix = "AuthConfig";
         private const string IssuerKey = "Issuer";
@@ -14,6 +14,8 @@ namespace Nvisibl.Cloud.Authentication
         private const string SecretKey = "Secret";
 
         private readonly IConfiguration _configuration;
+
+        internal static string SecurityAlgorithm { get; } = SecurityAlgorithms.HmacSha256;
 
         internal JwtConfiguration(IConfiguration configuration)
         {
