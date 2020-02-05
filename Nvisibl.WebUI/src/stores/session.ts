@@ -23,11 +23,11 @@ const session = writable(activeSession);
 
 export default {
     get: (): AuthSession => activeSession,
-    set: (user?: User, accessToken?: string): void => {
-        const activeUser = user instanceof User ? user : activeSession.user;
-        const activeToken = accessToken || activeSession.accessToken;
-        activeSession = { user: activeUser, accessToken: activeToken };
+    set: (accessToken: string, user?: User): void => {
+        const activeUser = user || activeSession.user;
+        activeSession = { user: activeUser, accessToken };
         session.set(activeSession);
+        Lockr.set('session', activeSession);
     },
     subscribe: session.subscribe,
 };
