@@ -29,5 +29,7 @@ module.exports = {
         'linebreak-style': 0,
         'indent': [ 'error', 4, { 'SwitchCase': 1 } ],
         'import/extensions': [ 'error', 'ignorePackages', { 'js': 'never', 'ts': 'never' } ],
+        'no-underscore-dangle': [ 'error', { 'allowAfterThis': true } ],
+        'operator-linebreak': [ 'error', 'before' ],
     },
 };
