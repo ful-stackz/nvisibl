@@ -35,6 +35,8 @@ namespace Nvisibl.Cloud
         {
             services.AddLogging(options => options.AddConsole());
 
+            services.AddCors();
+
             services.AddDbContext<AuthContext>(
                 options => options.UseMySql(
                     ConnectionStringHelper.GetConnectionString(Configuration)));
@@ -86,6 +88,8 @@ namespace Nvisibl.Cloud
             app.UseHttpsRedirection();
 
             app.UseRouting();
+
+            app.UseCors(config => config.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
 
             app.UseAuthorization();
 
