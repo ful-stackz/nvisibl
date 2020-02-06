@@ -31,5 +31,10 @@ export default {
         Lockr.set(sessionStorageKey, activeSession);
         session.set(activeSession);
     },
+    clear: (): void => {
+        activeSession = { user: undefined, accessToken: undefined };
+        Lockr.set(sessionStorageKey, activeSession);
+        session.set(activeSession);
+    },
     subscribe: session.subscribe,
 };
