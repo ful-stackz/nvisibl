@@ -3,6 +3,7 @@
     import session from './stores/session';
     import Login from './components/Login.svelte';
     import Register from './components/Register.svelte';
+    import UserBar from './components/UserBar.svelte';
     import Api from './server/api';
     import User from './models/user';
 
@@ -38,5 +39,7 @@
                 <Register {api} />
             </div>
         </div>
+    {:else}
+        <UserBar />
     {/if}
 </div>
