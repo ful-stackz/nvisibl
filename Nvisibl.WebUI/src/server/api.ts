@@ -40,6 +40,7 @@ export default class Api {
     }
 
     private static stringifyQuery(query: any): string {
+        if (!query) return '';
         // eslint-disable-next-line prefer-template
         return '?' + Object.entries<string|number|boolean>(query)
             .filter(([, value]) => value && value.toString().length > 0)

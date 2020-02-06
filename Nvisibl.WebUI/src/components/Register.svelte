@@ -29,7 +29,7 @@
             .then((_) => {
                 username = '';
                 password = '';
-                confirmPasword = '';
+                confirmPassword = '';
                 errorMessages = [];
             })
             .catch(({ response }) => {
