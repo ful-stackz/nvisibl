@@ -19,6 +19,7 @@
                 isLoading = false;
             })
             .catch((_) => {
+                isLoading = false;
                 inError = true;
             });
     });
