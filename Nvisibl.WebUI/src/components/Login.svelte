@@ -17,12 +17,9 @@
     });
 
     function login(): void {
-        if (!username) usernameWarning = 'Please type in your username.';
-        if (!password) passwordWarning = 'Please type in your password.';
+        usernameWarning = username ? '' : 'Please type in your username.';
+        passwordWarning = password ? '' : 'Please type in your password.';
         if (!username || !password) return;
-
-        usernameWarning = '';
-        passwordWarning = '';
 
         api.post('auth/login', { username, password })
             .then(({ data }) => {
