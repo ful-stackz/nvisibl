@@ -7,8 +7,10 @@ export interface AuthSession {
     accessToken: string
 }
 
+const sessionStorageKey: string = 'session';
+
 Lockr.prefix = 'nvisibl_';
-const storedSession: AuthSession = Lockr.get('session', {});
+const storedSession: AuthSession = Lockr.get(sessionStorageKey, { });
 
 let activeSession: AuthSession = (
     storedSession
@@ -26,8 +28,8 @@ export default {
     set: (accessToken: string, user?: User): void => {
         const activeUser = user || activeSession.user;
         activeSession = { user: activeUser, accessToken };
+        Lockr.set(sessionStorageKey, activeSession);
         session.set(activeSession);
-        Lockr.set('session', activeSession);
     },
     subscribe: session.subscribe,
 };
