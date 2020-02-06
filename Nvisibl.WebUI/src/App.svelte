@@ -2,6 +2,7 @@
     import { onMount, onDestroy } from 'svelte';
     import session from './stores/session';
     import Login from './components/Login.svelte';
+    import Register from './components/Register.svelte';
     import Api from './server/api';
     import User from './models/user';
 
@@ -10,7 +11,6 @@
     let isLoggedIn: boolean;
 
     const unsubscribeSession = session.subscribe((state) => {
-        console.log(state);
         if (state.user && state.accessToken) {
             isLoggedIn = true;
         } else {
@@ -29,6 +29,14 @@
 
 <div class="container mx-auto">
     {#if !isLoggedIn}
-        <Login {api} />
+        <div class="flex justify-center">
+            <div class="m-2 self-center">
+                <Login {api} />
+            </div>
+            <div class="m-2 self-center italic">- Or -</div>
+            <div class="m-2 self-center">
+                <Register {api} />
+            </div>
+        </div>
     {/if}
 </div>
