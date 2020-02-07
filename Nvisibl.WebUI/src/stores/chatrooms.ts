@@ -1,9 +1,10 @@
-import { writable, Writable } from 'svelte/store';
+import { writable, Writable, get } from 'svelte/store';
 import Chatroom from '../models/chatroom';
 
 const chatrooms: Writable<Chatroom[]> = writable([]);
 
 export default {
+    get: (): Chatroom[] => get(chatrooms),
     add: (chatroom: Chatroom): void => {
         chatrooms.update((current) => [...current, chatroom]);
     },
