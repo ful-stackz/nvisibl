@@ -9,24 +9,41 @@
     import Chatrooms from './components/Chatrooms.svelte';
     import FriendsList from './components/FriendsList.svelte';
     import Api from './server/api';
+    import WebSocketSession from './server/webSocketSession';
     import User from './models/user';
 
     export let api: Api = null;
+    export let webSocketAddress: string;
 
     let isLoggedIn: boolean;
+    let webSocketSession: WebSocketSession;
 
     const unsubscribeSession = session.subscribe((state) => {
         if (state.user && state.accessToken) {
             isLoggedIn = true;
+            if (!webSocketSession) {
+                webSocketSession = new WebSocketSession(
+                    webSocketAddress,
+                    state.user,
+                    state.accessToken,
+                );
+            } else {
+                webSocketSession.changeAccessToken(state.accessToken);
+            }
         } else {
             friends.clear();
             chatrooms.clear();
+            if (webSocketSession) {
+                webSocketSession.close();
+                webSocketSession = null;
+            }
             isLoggedIn = false;
         }
     });
 
     onMount(() => {
         if (!api) throw new Error('Api prop is not provided.');
+        if (!webSocketAddress) throw new Error('WebSocketAddress prop is not provided.');
     });
 
     onDestroy(() => {
