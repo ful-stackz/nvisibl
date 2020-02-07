@@ -11,5 +11,8 @@ namespace Nvisibl.Business.Models.Chatrooms
         [MinLength(3)]
         [MaxLength(100)]
         public string ChatroomName { get; set; } = string.Empty;
+
+        [Required]
+        public bool IsShared { get; set; }
     }
 }

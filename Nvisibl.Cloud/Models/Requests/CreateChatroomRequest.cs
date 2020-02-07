@@ -11,5 +11,7 @@ namespace Nvisibl.Cloud.Models.Requests
         [MinLength(3)]
         [MaxLength(100)]
         public string ChatroomName { get; set; } = string.Empty;
+
+        public bool IsShared { get; set; } = false;
     }
 }

@@ -9,5 +9,8 @@ namespace Nvisibl.Business.Models.Chatrooms
 
         [Required]
         public string Name { get; set; } = string.Empty;
+
+        [Required]
+        public bool IsShared { get; set; }
     }
 }

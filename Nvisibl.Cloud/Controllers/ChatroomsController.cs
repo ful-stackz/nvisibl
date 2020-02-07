@@ -35,6 +35,7 @@ namespace Nvisibl.Cloud.Controllers
                 {
                     Id = cr.Id,
                     Name = cr.Name,
+                    IsShared = cr.IsShared,
                 }));
             }
             catch (Exception ex)
@@ -65,6 +66,7 @@ namespace Nvisibl.Cloud.Controllers
                 {
                     Id = chatroom.Id,
                     Name = chatroom.Name,
+                    IsShared = chatroom.IsShared,
                     Users = chatroomUsers,
                 });
             }
@@ -89,12 +91,14 @@ namespace Nvisibl.Cloud.Controllers
                 {
                     ChatroomName = request.ChatroomName,
                     OwnerId = request.OwnerId,
+                    IsShared = request.IsShared,
                 });
                 return chatroom is { }
                     ? new JsonResult(new BasicChatroomResponse
                     {
                         Id = chatroom.Id,
                         Name = chatroom.Name,
+                        IsShared = chatroom.IsShared,
                     })
                     : (ActionResult)BadRequest();
             }
@@ -128,6 +132,18 @@ namespace Nvisibl.Cloud.Controllers
         {
             try
             {
+                var chatroom = await _chatroomManagerService.GetChatroomAsync(id);
+                if (chatroom is null)
+                {
+                    return NotFound();
+                }
+
+                var users = await _chatroomManagerService.GetChatroomUsersAsync(id);
+                if (!chatroom.IsShared && users.Count() == 2)
+                {
+                    return BadRequest();
+                }
+
                 await _chatroomManagerService.AddUserToChatroomAsync(new AddUserToChatroomModel
                 {
                     ChatroomId = id,
