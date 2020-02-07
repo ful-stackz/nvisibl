@@ -4,6 +4,7 @@
     import Login from './components/Login.svelte';
     import Register from './components/Register.svelte';
     import UserBar from './components/UserBar.svelte';
+    import Chatrooms from './components/Chatrooms.svelte';
     import FriendsList from './components/FriendsList.svelte';
     import Api from './server/api';
     import User from './models/user';
@@ -44,6 +45,9 @@
         <div class="mb-2">
             <UserBar />
         </div>
-        <FriendsList {api} />
+        <div class="mb-2">
+            <FriendsList {api} />
+        </div>
+        <Chatrooms {api} />
     {/if}
 </div>
