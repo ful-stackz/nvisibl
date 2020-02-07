@@ -8,7 +8,6 @@ namespace Nvisibl.DataLibrary.Models
     {
         public int Id { get; set; }
 
-        [Required]
         [MaxLength(100)]
         [Column(TypeName = "varchar(100)")]
         public string Name { get; set; } = string.Empty;
