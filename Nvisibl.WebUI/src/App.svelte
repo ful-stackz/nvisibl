@@ -1,6 +1,8 @@
 <script lang="ts">
     import { onMount, onDestroy } from 'svelte';
     import session from './stores/session';
+    import friends from './stores/friends';
+    import chatrooms from './stores/chatrooms';
     import Login from './components/Login.svelte';
     import Register from './components/Register.svelte';
     import UserBar from './components/UserBar.svelte';
@@ -17,6 +19,8 @@
         if (state.user && state.accessToken) {
             isLoggedIn = true;
         } else {
+            friends.clear();
+            chatrooms.clear();
             isLoggedIn = false;
         }
     });
