@@ -27,6 +27,7 @@
                     chatrooms.add(new Chatroom(
                         chatroom.id,
                         chatroom.name,
+                        chatroom.isShared,
                         chatroom.users.map(({ id, username }) => new User(id, username)),
                     ));
                 });
