@@ -24,6 +24,11 @@
                     return;
                 }
                 data.chatrooms.forEach((chatroom) => {
+                    if (!chatroom.isShared && !chatroom.name) {
+                        chatroom.name = chatroom.users
+                            .find(({ id }) => id !== user.id)
+                            .username;
+                    }
                     chatrooms.add(new Chatroom(
                         chatroom.id,
                         chatroom.name,

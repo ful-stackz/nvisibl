@@ -50,6 +50,7 @@
         } else {
             createPrivateChatroom(friend)
                 .then((cr: Chatroom) => {
+                    cr.name = friend.username;
                     chatrooms.add(cr);
                     // Set as active chatroom
                 })
