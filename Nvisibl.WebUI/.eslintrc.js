@@ -18,7 +18,7 @@ module.exports = {
     settings: {
         'import/resolver': {
             'node': {
-                'extensions': [ '.js', '.ts' ],
+                'extensions': ['.js', '.ts'],
             },
         },
     },
@@ -27,10 +27,10 @@ module.exports = {
     ],
     rules: {
         'linebreak-style': 0,
-        'indent': [ 'error', 4, { 'SwitchCase': 1 } ],
-        'import/extensions': [ 'error', 'ignorePackages', { 'js': 'never', 'ts': 'never' } ],
-        'no-underscore-dangle': [ 'error', { 'allowAfterThis': true } ],
-        'operator-linebreak': [ 'error', 'before' ],
+        'indent': ['error', 4, { 'SwitchCase': 1 }],
+        'import/extensions': ['error', 'ignorePackages', { 'js': 'never', 'ts': 'never' }],
+        'no-underscore-dangle': ['error', { 'allowAfterThis': true }],
+        'operator-linebreak': ['error', 'before'],
         'no-unused-vars': 'off',
         '@typescript-eslint/no-unused-vars': [
             'error',
