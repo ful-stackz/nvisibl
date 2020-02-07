@@ -12,6 +12,7 @@ namespace Nvisibl.Business.Models
             {
                 Id = chatroom.Id,
                 Name = chatroom.Name,
+                IsShared = chatroom.IsShared,
             };
 
         internal static MessageModel ToMessageModel(Message message) =>
