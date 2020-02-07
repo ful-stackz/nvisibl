@@ -89,7 +89,7 @@ namespace Nvisibl.Cloud.Controllers
             {
                 var chatroom = await _chatroomManagerService.CreateChatroomAsync(new CreateChatroomModel
                 {
-                    ChatroomName = request.ChatroomName,
+                    ChatroomName = request.ChatroomName ?? string.Empty,
                     OwnerId = request.OwnerId,
                     IsShared = request.IsShared,
                 });
