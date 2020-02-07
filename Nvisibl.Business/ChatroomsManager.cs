@@ -36,7 +36,11 @@ namespace Nvisibl.Business
 
             await EnsureUserExistsAsync(createChatroomModel.OwnerId);
 
-            var chatroom = new Chatroom { Name = createChatroomModel.ChatroomName, };
+            var chatroom = new Chatroom
+            {
+                Name = createChatroomModel.ChatroomName,
+                IsShared = createChatroomModel.IsShared,
+            };
             await _unitOfWork.GetRepository<IChatroomRepository>().AddAsync(chatroom);
             _ = await _unitOfWork.CompleteAsync();
 
