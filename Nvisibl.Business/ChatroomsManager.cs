@@ -36,9 +36,14 @@ namespace Nvisibl.Business
 
             await EnsureUserExistsAsync(createChatroomModel.OwnerId);
 
+            if (createChatroomModel.IsShared && string.IsNullOrEmpty(createChatroomModel.ChatroomName))
+            {
+                throw new InvalidOperationException($"Shared chatrooms must specify a chatroom name.");
+            }
+
             var chatroom = new Chatroom
             {
-                Name = createChatroomModel.ChatroomName,
+                Name = createChatroomModel.ChatroomName ?? string.Empty,
                 IsShared = createChatroomModel.IsShared,
             };
             await _unitOfWork.GetRepository<IChatroomRepository>().AddAsync(chatroom);
