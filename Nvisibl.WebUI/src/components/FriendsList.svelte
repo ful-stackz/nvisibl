@@ -3,6 +3,7 @@
     import session from '../stores/session';
     import friends from '../stores/friends';
     import chatrooms from '../stores/chatrooms';
+    import chatService from '../services/chatService';
     import Api from '../server/api';
     import User from '../models/user';
     import Chatroom from '../models/chatroom';
@@ -46,13 +47,12 @@
                 : chatroom.users.find((user) => user.id === friend.id);
         });
         if (chatroom) {
-            // Set as active chatroom
+            chatService.setActiveChatroom(chatroom);
         } else {
             createPrivateChatroom(friend)
                 .then((cr: Chatroom) => {
-                    cr.name = friend.username;
                     chatrooms.add(cr);
-                    // Set as active chatroom
+                    chatService.setActiveChatroom(cr);
                 })
                 .catch((error) => {
                     console.error(error);
@@ -82,7 +82,7 @@
     }
 </script>
 
-<div class="bg-gray-200 p-3 rounded w-1/4">
+<div class="bg-gray-200 p-3 rounded">
     <div class="text-lg">Friends</div>
     {#if isLoading}
         <div>Loading...</div>
