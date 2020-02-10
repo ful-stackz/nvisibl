@@ -104,7 +104,7 @@ namespace Nvisibl.Cloud.Middleware
             }
 
             var sessionId = Guid.NewGuid();
-            var chatClient = new ChatClient(
+            using var chatClient = new ChatClient(
                 connectionRequest.UserId,
                 sessionId,
                 webSocketSession,
