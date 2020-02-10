@@ -70,7 +70,7 @@
             },
             accessToken,
         );
-        const chatroom = new Chatroom(data.id, data.name, data.isShared, [user, friend]);
+        const chatroom = new Chatroom(data.id, friend.username, data.isShared, [user, friend]);
         await api.post(
             `chatrooms/${chatroom.id}/users`,
             {
