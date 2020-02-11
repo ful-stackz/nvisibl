@@ -1,6 +1,5 @@
 <script lang="ts">
     import { onMount, onDestroy } from 'svelte';
-    import chatService from '../services/chatService';
     import Api from '../server/api';
     import Chatroom from '../models/chatroom';
     import User from '../models/user';
@@ -17,7 +16,8 @@
         .subscribe((current) => visibleChatrooms = current);
 
     function handleChatroomClick(chatroom: Chatroom): void {
-        const activeChatroom = chatService.activeChatroom.getValue();
+        const chatService = sessionManager.get().chatService;
+        const activeChatroom = chatService.getActiveChatroom();
         if (activeChatroom && activeChatroom.id === chatroom.id) return;
         chatService.setActiveChatroom(chatroom);
     }

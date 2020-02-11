@@ -1,6 +1,5 @@
 <script lang="ts">
     import { onMount, onDestroy } from 'svelte';
-    import chatService from '../services/chatService';
     import Api from '../server/api';
     import User from '../models/user';
     import Chatroom from '../models/chatroom';
@@ -43,7 +42,7 @@
     });
 
     function handleFriendClick(friend: User): void {
-        const chatrooms = sessionManager.get().chatrooms;
+        const { chatrooms, chatService } = sessionManager.get();
         const chatroom = chatrooms.getAll().find((chatroom) => {
             return chatroom.isShared
                 ? false

@@ -1,6 +1,5 @@
 <script lang="ts">
     import { onMount, onDestroy } from 'svelte';
-    import chatService from '../services/chatService';
     import User from '../models/user';
     import Message from '../models/message';
     import Chatroom from '../models/chatroom';
@@ -13,17 +12,14 @@
     let user: User = null;
 
     const messagesSub = sessionManager.get().messages.latestMessage.subscribe((message): void => {
-        console.log('Received message in message panel', message);
         if (!chatroom) return;
-        console.log(chatroom);
-        console.log('Received message', message);
         if (message.chatroomId === chatroom.id) {
             visibleMessages = [...visibleMessages, message];
         }
     });
 
-    const chatroomsSub = chatService.activeChatroom.subscribe((next) => {
-        if (!next) return;
+    const chatroomsSub = sessionManager.get().chatService.onActiveChatroomChange.subscribe((next) => {
+        if (!next || (chatroom && chatroom.id === next.id)) return;
         chatroom = next;
         visibleMessages = sessionManager.get().messages.getChatroomMessages(next);
     });
@@ -42,6 +38,7 @@
             const subscription = session.chatrooms.onChange.subscribe((chatrooms) => {
                 if (chatrooms.length > 0) {
                     chatroom = chatrooms[0];
+                    session.chatService.setActiveChatroom(chatroom);
                     subscription.unsubscribe();
                 }
             });

@@ -3,6 +3,7 @@ import ChatroomsStore from '../stores/chatroomsStore';
 import FriendsStore from '../stores/friendsStore';
 import MessagesStore from '../stores/messagesStore';
 import WebSocketSession from '../server/webSocketSession';
+import ChatService from './chatService';
 
 export default class Session {
     constructor(auth: AuthDetails, webSocketSession: WebSocketSession) {
@@ -13,6 +14,7 @@ export default class Session {
         this.chatrooms = new ChatroomsStore();
         this.friends = new FriendsStore();
         this.messages = new MessagesStore();
+        this.chatService = new ChatService(this);
     }
 
     public readonly auth: AuthDetails;
@@ -20,4 +22,5 @@ export default class Session {
     public readonly chatrooms: ChatroomsStore;
     public readonly friends: FriendsStore;
     public readonly messages: MessagesStore;
+    public readonly chatService: ChatService;
 }
