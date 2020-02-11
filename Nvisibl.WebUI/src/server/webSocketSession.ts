@@ -1,5 +1,6 @@
 import { Subject, BehaviorSubject } from 'rxjs';
 import messageParser from './messages/messageParser';
+import AuthDetails from '../models/authDetails';
 import User from '../models/user';
 import ClientMessage from './messages/client/clientMessage';
 import ServerMessage from './messages/server/serverMessage';
@@ -30,13 +31,12 @@ export default class WebSocketSession {
 
     private _closeRequested: boolean;
 
-    constructor(address: string, user: User, accessToken: string) {
+    constructor(address: string, auth: AuthDetails) {
         if (!address) throw new Error('Invalid address.');
-        if (!user) throw new Error('Invalid user.');
-        if (!accessToken) throw new Error('Invalid access token.');
+        if (!auth) throw new Error('Invalid auth.');
         this._address = address;
-        this._user = user;
-        this._accessToken = accessToken;
+        this._user = auth.user;
+        this._accessToken = auth.accessToken;
         this._connectionTask = setInterval(
             () => this.tryConnect(),
             this.ConnectionRetryInterval,

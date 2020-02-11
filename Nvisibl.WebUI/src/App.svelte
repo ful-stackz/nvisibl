@@ -1,61 +1,36 @@
 <script lang="ts">
     import { onMount, onDestroy } from 'svelte';
-    import session from './stores/session';
-    import friends from './stores/friends';
-    import chatrooms from './stores/chatrooms';
     import Login from './components/Login.svelte';
     import Register from './components/Register.svelte';
     import UserBar from './components/UserBar.svelte';
     import Chatrooms from './components/Chatrooms.svelte';
     import FriendsList from './components/FriendsList.svelte';
+    import MessagePanel from './components/MessagePanel.svelte';
     import Api from './server/api';
-    import WebSocketSession from './server/webSocketSession';
-    import User from './models/user';
+    import SessionManager from './services/sessionManager';
 
     export let api: Api = null;
-    export let webSocketAddress: string;
+    export let sessionManager: SessionManager;
 
     let isLoggedIn: boolean;
-    let webSocketSession: WebSocketSession;
 
-    const unsubscribeSession = session.subscribe((state) => {
-        if (state.user && state.accessToken) {
-            isLoggedIn = true;
-            if (!webSocketSession) {
-                webSocketSession = new WebSocketSession(
-                    webSocketAddress,
-                    state.user,
-                    state.accessToken,
-                );
-            } else {
-                webSocketSession.changeAccessToken(state.accessToken);
-            }
-        } else {
-            friends.clear();
-            chatrooms.clear();
-            if (webSocketSession) {
-                webSocketSession.close();
-                webSocketSession = null;
-            }
-            isLoggedIn = false;
-        }
-    });
+    const sessionSub = sessionManager.onChange.subscribe((session) => isLoggedIn = !!session);
 
     onMount(() => {
         if (!api) throw new Error('Api prop is not provided.');
-        if (!webSocketAddress) throw new Error('WebSocketAddress prop is not provided.');
+        if (!sessionManager) throw new Error('SessionManager prop is not provided.');
     });
 
     onDestroy(() => {
-        unsubscribeSession();
+        sessionSub.unsubscribe();
     });
 </script>
 
-<div class="container mx-auto">
+<div class="container mx-auto h-screen">
     {#if !isLoggedIn}
         <div class="flex justify-center">
             <div class="m-2 self-center">
-                <Login {api} />
+                <Login {api} {sessionManager} />
             </div>
             <div class="m-2 self-center italic">- Or -</div>
             <div class="m-2 self-center">
@@ -64,11 +39,20 @@
         </div>
     {:else}
         <div class="mb-2">
-            <UserBar />
+            <UserBar {sessionManager} />
         </div>
-        <div class="mb-2">
-            <FriendsList {api} />
+        <div class="flex flex-row" style="height: calc(100% - 56px);">
+            <div class="w-1/4">
+                <div class="mb-2">
+                    <FriendsList {api} {sessionManager} />
+                </div>
+                <Chatrooms {api} {sessionManager} />
+            </div>
+            <div class="ml-2 w-3/4">
+                <div class="" style="height: 75%;">
+                    <MessagePanel {sessionManager} />
+                </div>
+            </div>
         </div>
-        <Chatrooms {api} />
     {/if}
 </div>

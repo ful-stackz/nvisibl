@@ -1,18 +1,18 @@
 <script lang="ts">
     import { onMount, onDestroy } from 'svelte';
-    import session from '../stores/session';
-    import messages from '../stores/messages';
-    import chatrooms from '../stores/chatrooms';
     import chatService from '../services/chatService';
     import User from '../models/user';
     import Message from '../models/message';
     import Chatroom from '../models/chatroom';
+    import SessionManager from '../services/sessionManager';
+
+    export let sessionManager: SessionManager = null;
 
     let visibleMessages: Message[] = [];
     let chatroom: Chatroom = null;
     let user: User = null;
 
-    const unsubscribeMessages = messages.subscribe((message: Message): void => {
+    const messagesSub = sessionManager.get().messages.latestMessage.subscribe((message): void => {
         console.log('Received message in message panel', message);
         if (!chatroom) return;
         console.log(chatroom);
@@ -22,10 +22,10 @@
         }
     });
 
-    const unsubscribeChatroom = chatService.activeChatroom.subscribe((next: Chatroom) => {
+    const chatroomsSub = chatService.activeChatroom.subscribe((next) => {
         if (!next) return;
         chatroom = next;
-        visibleMessages = messages.getChatroomMessages(next);
+        visibleMessages = sessionManager.get().messages.getChatroomMessages(next);
     });
 
     function ownsMessage(message: Message): boolean {
@@ -33,21 +33,24 @@
     }
 
     onMount((): void => {
-        user = session.get().user;
-        chatroom = chatrooms.get()[0];
+        if (!sessionManager) throw new Error('SessionManager prop is not provided.');
+
+        const session = sessionManager.get();
+        user = session.auth.user;
+        chatroom = session.chatrooms.getAll()[0];
         if (!chatroom) {
-            const unsubscribe = chatrooms.subscribe((chatrooms) => {
+            const subscription = session.chatrooms.onChange.subscribe((chatrooms) => {
                 if (chatrooms.length > 0) {
                     chatroom = chatrooms[0];
-                    unsubscribe();
+                    subscription.unsubscribe();
                 }
             });
         }
     });
 
     onDestroy(() => {
-        unsubscribeMessages();
-        unsubscribeChatroom.unsubscribe();
+        messagesSub.unsubscribe();
+        chatroomsSub.unsubscribe();
     });
 </script>
 
@@ -61,13 +64,13 @@
                 {#if ownsMessage(message)}
                     <div class="flex self-end justify-end w-1/2">
                         <div class="bg-blue-400 text-white p-2 m-2 rounded inline-block">
-                            <p class="opacity-25">{message.body}</p>
+                            <p class="opacity-25 hover:opacity-100">{message.body}</p>
                         </div>
                     </div>
                 {:else}
                     <div class="flex self-start w-1/2">
                         <div class="bg-blue-500 text-white p-2 m-2 rounded inline-block">
-                            <p class="opacity-25">{message.body}</p>
+                            <p class="opacity-25 hover:opacity-100">{message.body}</p>
                         </div>
                     </div>
                 {/if}

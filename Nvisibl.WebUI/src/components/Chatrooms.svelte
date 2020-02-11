@@ -1,19 +1,20 @@
 <script lang="ts">
     import { onMount, onDestroy } from 'svelte';
-    import session from '../stores/session';
-    import chatrooms from '../stores/chatrooms';
     import chatService from '../services/chatService';
     import Api from '../server/api';
     import Chatroom from '../models/chatroom';
     import User from '../models/user';
+    import SessionManager from '../services/sessionManager';
 
     export let api: Api = null;
+    export let sessionManager: SessionManager = null;
 
     let visibleChatrooms: Chatroom[] = [];
     let isLoading: boolean = true;
     let inError: boolean = false;
 
-    const unsubscribeChatrooms = chatrooms.subscribe((current) => visibleChatrooms = current);
+    const chatroomsSub = sessionManager.get().chatrooms.onChange
+        .subscribe((current) => visibleChatrooms = current);
 
     function handleChatroomClick(chatroom: Chatroom): void {
         const activeChatroom = chatService.activeChatroom.getValue();
@@ -23,7 +24,10 @@
 
     onMount(() => {
         if (!api) throw new Error('Api prop is not provided.');
-        const { user, accessToken } = session.get();
+        if (!sessionManager) throw new Error('SessionManager prop is not provided.');
+
+        const session = sessionManager.get();
+        const { user, accessToken } = session.auth;
         api.get(`users/${user.id}/chatrooms`, null, accessToken)
             .then(({ data }) => {
                 if (!data.chatrooms) {
@@ -36,7 +40,7 @@
                             .find(({ id }) => id !== user.id)
                             .username;
                     }
-                    chatrooms.add(new Chatroom(
+                    session.chatrooms.add(new Chatroom(
                         chatroom.id,
                         chatroom.name,
                         chatroom.isShared,
@@ -52,7 +56,7 @@
     });
 
     onDestroy(() => {
-        unsubscribeChatrooms();
+        chatroomsSub.unsubscribe();
     });
 </script>
 

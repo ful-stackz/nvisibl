@@ -1,13 +1,30 @@
 <script lang="ts">
-    import session from '../stores/session';
+    import { onMount, onDestroy } from 'svelte';
+    import User from '../models/user';
+    import SessionManager from '../services/sessionManager';
+
+    export let sessionManager: SessionManager = null;
+
+    let user: User;
+
+    const userSub = sessionManager.get().auth.onChange
+        .subscribe((next) => user = next.user);
 
     function logout(): void {
-        session.clear();
+        sessionManager.clear();
     }
+
+    onMount(() => {
+        if (!sessionManager) throw new Error('SessionManager prop is not provided.');
+    });
+
+    onDestroy(() => {
+        userSub.unsubscribe();
+    });
 </script>
 
 <div class="bg-gray-200 p-3 rounded rounded-t-none">
-    <span>Welcome, {($session).user.username}!</span>
+    <span>Welcome, {user.username}!</span>
     <a
         href="/#"
         class="float-right"

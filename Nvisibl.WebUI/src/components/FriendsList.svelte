@@ -1,24 +1,26 @@
 <script lang="ts">
     import { onMount, onDestroy } from 'svelte';
-    import session from '../stores/session';
-    import friends from '../stores/friends';
-    import chatrooms from '../stores/chatrooms';
     import chatService from '../services/chatService';
     import Api from '../server/api';
     import User from '../models/user';
     import Chatroom from '../models/chatroom';
+    import SessionManager from '../services/sessionManager';
 
     export let api: Api = null;
+    export let sessionManager: SessionManager = null;
 
     let visibleFriends: User[] = [];
     let isLoading: boolean = true;
     let inError: boolean = false;
 
-    const unsubscribeFriends = friends.subscribe((current) => visibleFriends = current);
+    const friendsSub = sessionManager.get().friends.onChange
+        .subscribe((current) => visibleFriends = current);
 
     onMount(() => {
         if (!api) throw new Error('Api prop is not provided.');
-        const { user, accessToken } = session.get();
+        if (!sessionManager) throw new Error('SessionManager prop is not provided.');
+        const session = sessionManager.get();
+        const { user, accessToken } = session.auth;
         api.get(`users/${user.id}/friends`, null, accessToken)
             .then(({ data }) => {
                 if (!data) {
@@ -26,7 +28,7 @@
                     return;
                 }
                 data.forEach(({ id, username }) => {
-                    friends.add(new User(id, username));
+                    session.friends.add(new User(id, username));
                 });
                 isLoading = false;
             })
@@ -37,11 +39,12 @@
     });
 
     onDestroy(() => {
-        unsubscribeFriends();
+        friendsSub.unsubscribe();
     });
 
     function handleFriendClick(friend: User): void {
-        const chatroom = chatrooms.get().find((chatroom) => {
+        const chatrooms = sessionManager.get().chatrooms;
+        const chatroom = chatrooms.getAll().find((chatroom) => {
             return chatroom.isShared
                 ? false
                 : chatroom.users.find((user) => user.id === friend.id);
@@ -61,7 +64,7 @@
     }
 
     async function createPrivateChatroom(friend: User): Promise<Chatroom> {
-        const { user, accessToken } = session.get();
+        const { user, accessToken } = sessionManager.get().auth;
         const { data } = await api.post(
             'chatrooms',
             {
