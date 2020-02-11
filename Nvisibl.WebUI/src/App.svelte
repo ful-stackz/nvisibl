@@ -6,6 +6,7 @@
     import Chatrooms from './components/Chatrooms.svelte';
     import FriendsList from './components/FriendsList.svelte';
     import MessagePanel from './components/MessagePanel.svelte';
+    import MessageComposer from './components/MessageComposer.svelte';
     import Api from './server/api';
     import SessionManager from './services/sessionManager';
 
@@ -49,8 +50,11 @@
                 <Chatrooms {api} {sessionManager} />
             </div>
             <div class="ml-2 w-3/4">
-                <div class="" style="height: 75%;">
+                <div style="height: 90%;">
                     <MessagePanel {sessionManager} />
+                </div>
+                <div class="py-2" style="height: 10%;">
+                    <MessageComposer {sessionManager} />
                 </div>
             </div>
         </div>
