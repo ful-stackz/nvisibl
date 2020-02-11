@@ -61,13 +61,13 @@
                 {#if ownsMessage(message)}
                     <div class="flex self-end justify-end w-1/2">
                         <div class="bg-blue-400 text-white p-2 m-2 rounded inline-block">
-                            <p class="opacity-25 hover:opacity-100">{message.body}</p>
+                            <p class="-opacity-25 -hover:opacity-100">{message.body}</p>
                         </div>
                     </div>
                 {:else}
                     <div class="flex self-start w-1/2">
                         <div class="bg-blue-500 text-white p-2 m-2 rounded inline-block">
-                            <p class="opacity-25 hover:opacity-100">{message.body}</p>
+                            <p class="-opacity-25 -hover:opacity-100">{message.body}</p>
                         </div>
                     </div>
                 {/if}
