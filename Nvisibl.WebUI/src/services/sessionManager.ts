@@ -67,6 +67,7 @@ export default class SessionManager {
         Lockr.set(this.AuthDetailsStorageKey, null);
         this._wsProcessor.stop();
         this._wsProcessor = null;
+        this._session.webSocketSession.close();
         this._session = null;
         this.onChange.next(null);
     }
