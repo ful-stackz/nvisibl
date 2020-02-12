@@ -155,12 +155,10 @@ namespace Nvisibl.Cloud.Controllers
                     expires: validBefore,
                     signingCredentials: signingCredentials);
 
-                return new JsonResult(new AuthTokenResponse
-                {
-                    AccessToken = new JwtSecurityTokenHandler().WriteToken(token),
-                    CreatedAt = createdAt.ToString("o"),
-                    ValidBefore = validBefore.ToString("o"),
-                });
+                return new JsonResult(new AuthTokenResponse(
+                    accessToken: new JwtSecurityTokenHandler().WriteToken(token),
+                    createdAt: createdAt.ToString("o"),
+                    validBefore: validBefore.ToString("o")));
             }
             catch (Exception ex)
             {
