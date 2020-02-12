@@ -7,6 +7,8 @@ using Nvisibl.Cloud.Models.Responses;
 using System;
 using System.Threading.Tasks;
 using System.Linq;
+using Microsoft.AspNetCore.Authorization;
+using Nvisibl.Cloud.Authentication;
 
 namespace Nvisibl.Cloud.Controllers
 {
@@ -35,6 +37,7 @@ namespace Nvisibl.Cloud.Controllers
                 {
                     Id = cr.Id,
                     Name = cr.Name,
+                    IsShared = cr.IsShared,
                 }));
             }
             catch (Exception ex)
@@ -65,6 +68,7 @@ namespace Nvisibl.Cloud.Controllers
                 {
                     Id = chatroom.Id,
                     Name = chatroom.Name,
+                    IsShared = chatroom.IsShared,
                     Users = chatroomUsers,
                 });
             }
@@ -87,14 +91,16 @@ namespace Nvisibl.Cloud.Controllers
             {
                 var chatroom = await _chatroomManagerService.CreateChatroomAsync(new CreateChatroomModel
                 {
-                    ChatroomName = request.ChatroomName,
+                    ChatroomName = request.ChatroomName ?? string.Empty,
                     OwnerId = request.OwnerId,
+                    IsShared = request.IsShared,
                 });
                 return chatroom is { }
                     ? new JsonResult(new BasicChatroomResponse
                     {
                         Id = chatroom.Id,
                         Name = chatroom.Name,
+                        IsShared = chatroom.IsShared,
                     })
                     : (ActionResult)BadRequest();
             }
@@ -120,6 +126,35 @@ namespace Nvisibl.Cloud.Controllers
             }
         }
 
+        [Authorize(AuthenticationSchemes = JwtSchemes.Admin + "," + JwtSchemes.User)]
+        [HttpGet("{id}/messages")]
+        public async Task<IActionResult> GetChatroomMessages(
+            int id,
+            [FromServices] IMessagesManager messagesManager,
+            [FromQuery] DateTime? olderThan = null,
+            [FromQuery] int pageSize = 20)
+        {
+            try
+            {
+                var messages = await messagesManager.GetChatroomMessagesAsync(
+                    id,
+                    olderThan ?? DateTime.UtcNow,
+                    pageSize);
+                return new JsonResult(messages.Select(m => new MessageResponse
+                {
+                    AuthorId = m.AuthorId,
+                    Body = m.Body,
+                    ChatroomId = m.ChatroomId,
+                    Id = m.Id,
+                    TimeSentUtc = m.TimeSentUtc,
+                }));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, $"Could not retrieve messages for chatroom with id ({id}).");
+                return BadRequest();
+            }
+        }
 
         [HttpPost("{id}/users")]
         public async Task<ActionResult> AddUserAsync(
@@ -128,6 +163,18 @@ namespace Nvisibl.Cloud.Controllers
         {
             try
             {
+                var chatroom = await _chatroomManagerService.GetChatroomAsync(id);
+                if (chatroom is null)
+                {
+                    return NotFound();
+                }
+
+                var users = await _chatroomManagerService.GetChatroomUsersAsync(id);
+                if (!chatroom.IsShared && users.Count() == 2)
+                {
+                    return BadRequest();
+                }
+
                 await _chatroomManagerService.AddUserToChatroomAsync(new AddUserToChatroomModel
                 {
                     ChatroomId = id,

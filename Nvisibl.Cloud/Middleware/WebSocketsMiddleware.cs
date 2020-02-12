@@ -96,7 +96,7 @@ namespace Nvisibl.Cloud.Middleware
             httpContext.Request.Headers.Add("Authorization", $"Bearer {connectionRequest.AccessToken}");
             var authResults = await Task.WhenAll(
                 httpContext.AuthenticateAsync(JwtSchemes.Admin),
-                httpContext.AuthenticateAsync(JwtSchemes.User));                
+                httpContext.AuthenticateAsync(JwtSchemes.User));
             if (authResults.All(result => !result.Succeeded))
             {
                 await httpContext.Response.CompleteAsync();
@@ -104,7 +104,7 @@ namespace Nvisibl.Cloud.Middleware
             }
 
             var sessionId = Guid.NewGuid();
-            var chatClient = new ChatClient(
+            using var chatClient = new ChatClient(
                 connectionRequest.UserId,
                 sessionId,
                 webSocketSession,

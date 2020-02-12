@@ -83,6 +83,39 @@ namespace Nvisibl.Business
                 .ToList();
         }
 
+        public async Task<IEnumerable<MessageModel>> GetChatroomMessagesAsync(
+            int id,
+            DateTime olderThan,
+            int pageSize)
+        {
+            if (_isDisposed)
+            {
+                throw new ObjectDisposedException(GetType().Name);
+            }
+
+            if (id < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(id), id, string.Empty);
+            }
+
+            if (pageSize < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(pageSize), pageSize, string.Empty);
+            }
+
+            var chatroom = await _unitOfWork.GetRepository<IChatroomRepository>().GetAsync(id);
+            if (chatroom is null)
+            {
+                throw new InvalidOperationException($"Chatroom with id ({id}) does not exist.");
+            }
+
+            return await Task.Run(() =>
+                _unitOfWork.GetRepository<IMessageRepository>()
+                .Find(m => m.ChatroomId == id && m.TimeSentUtc <= olderThan, maxCount: pageSize)
+                .Select(Mappers.ToMessageModel)
+                .ToList());
+        }
+
         public async Task<IEnumerable<MessageModel>> GetUserMessagesAsync(
             int id,
             int page,

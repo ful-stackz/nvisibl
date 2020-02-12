@@ -8,10 +8,12 @@ namespace Nvisibl.DataLibrary.Models
     {
         public int Id { get; set; }
 
-        [Required]
         [MaxLength(100)]
         [Column(TypeName = "varchar(100)")]
         public string Name { get; set; } = string.Empty;
+
+        [Required]
+        public bool IsShared { get; set; }
 
         public IList<ChatroomUser> Users { get; set; } = new List<ChatroomUser>();
 

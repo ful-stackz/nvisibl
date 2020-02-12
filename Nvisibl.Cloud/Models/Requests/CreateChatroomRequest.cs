@@ -7,9 +7,10 @@ namespace Nvisibl.Cloud.Models.Requests
         [Required]
         public int OwnerId { get; set; }
 
-        [Required]
         [MinLength(3)]
         [MaxLength(100)]
-        public string ChatroomName { get; set; } = string.Empty;
+        public string? ChatroomName { get; set; } = null;
+
+        public bool IsShared { get; set; } = false;
     }
 }

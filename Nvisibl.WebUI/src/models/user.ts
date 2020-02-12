@@ -5,6 +5,5 @@ export default class User {
     }
 
     public readonly id: number;
-
     public readonly username: string;
 }

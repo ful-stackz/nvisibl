@@ -1,38 +1,37 @@
 <script lang="ts">
     import { onMount, onDestroy } from 'svelte';
-    import session from './stores/session';
     import Login from './components/Login.svelte';
     import Register from './components/Register.svelte';
     import UserBar from './components/UserBar.svelte';
+    import Chatrooms from './components/Chatrooms.svelte';
+    import FriendsList from './components/FriendsList.svelte';
+    import MessagePanel from './components/MessagePanel.svelte';
+    import MessageComposer from './components/MessageComposer.svelte';
     import Api from './server/api';
-    import User from './models/user';
+    import SessionManager from './services/sessionManager';
 
     export let api: Api = null;
+    export let sessionManager: SessionManager;
 
     let isLoggedIn: boolean;
 
-    const unsubscribeSession = session.subscribe((state) => {
-        if (state.user && state.accessToken) {
-            isLoggedIn = true;
-        } else {
-            isLoggedIn = false;
-        }
-    });
+    const sessionSub = sessionManager.onChange.subscribe((session) => isLoggedIn = !!session);
 
     onMount(() => {
         if (!api) throw new Error('Api prop is not provided.');
+        if (!sessionManager) throw new Error('SessionManager prop is not provided.');
     });
 
     onDestroy(() => {
-        unsubscribeSession();
+        sessionSub.unsubscribe();
     });
 </script>
 
-<div class="container mx-auto">
+<div class="container mx-auto h-screen">
     {#if !isLoggedIn}
         <div class="flex justify-center">
             <div class="m-2 self-center">
-                <Login {api} />
+                <Login {api} {sessionManager} />
             </div>
             <div class="m-2 self-center italic">- Or -</div>
             <div class="m-2 self-center">
@@ -40,6 +39,24 @@
             </div>
         </div>
     {:else}
-        <UserBar />
+        <div class="mb-2">
+            <UserBar {sessionManager} />
+        </div>
+        <div class="flex flex-row" style="height: calc(100% - 56px);">
+            <div class="w-1/4">
+                <div class="mb-2">
+                    <FriendsList {api} {sessionManager} />
+                </div>
+                <Chatrooms {api} {sessionManager} />
+            </div>
+            <div class="ml-2 w-3/4">
+                <div style="height: 90%;">
+                    <MessagePanel {api} {sessionManager} />
+                </div>
+                <div class="py-2" style="height: 10%;">
+                    <MessageComposer {sessionManager} />
+                </div>
+            </div>
+        </div>
     {/if}
 </div>

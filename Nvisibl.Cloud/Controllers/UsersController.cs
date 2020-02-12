@@ -1,10 +1,13 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Nvisibl.Business.Interfaces;
 using Nvisibl.Business.Models.Users;
+using Nvisibl.Cloud.Authentication;
 using Nvisibl.Cloud.Models.Requests;
 using Nvisibl.Cloud.Models.Responses;
 
@@ -97,6 +100,44 @@ namespace Nvisibl.Cloud.Controllers
             catch (Exception ex)
             {
                 _logger.LogWarning(ex, $"Could not friends of user with id ({id}).");
+                return BadRequest();
+            }
+        }
+
+        [Authorize(AuthenticationSchemes = JwtSchemes.Admin + "," + JwtSchemes.User)]
+        [HttpGet("{id}/chatrooms")]
+        public async Task<IActionResult> GetChatroomsAsync(
+            int id,
+            [FromServices] IChatroomsManager chatroomsManager)
+        {
+            try
+            {
+                var user = await _userManager.GetUserAsync(id);
+                if (user is null)
+                {
+                    return NotFound();
+                }
+
+                var chatrooms = await chatroomsManager.GetUserChatroomsAsync(user);
+                var responseChatrooms = new List<ChatroomResponse>();
+                foreach (var chatroom in chatrooms)
+                {
+                    var chatroomUsers = (await chatroomsManager.GetChatroomUsersAsync(chatroom.Id))
+                        .Select(user => new BasicUserResponse { Id = user.Id, Username = user.Username })
+                        .ToList();
+                    responseChatrooms.Add(new ChatroomResponse
+                    {
+                        Id = chatroom.Id,
+                        Name = chatroom.Name,
+                        Users = chatroomUsers,
+                    });
+                }
+
+                return new JsonResult(new UserChatroomsResponse { Chatrooms = responseChatrooms });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, $"Could not retrieve the chatrooms of user with id ({id}).");
                 return BadRequest();
             }
         }
