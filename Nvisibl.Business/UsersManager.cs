@@ -40,6 +40,44 @@ namespace Nvisibl.Business
             return Mappers.ToUserModel(user);
         }
 
+        public async Task<FriendModel> CreateFriendRequestAsync(AddUserFriendModel addUserFriendModel)
+        {
+            if (_isDisposed)
+            {
+                throw new ObjectDisposedException(GetType().Name);
+            }
+
+            if (addUserFriendModel is null)
+            {
+                throw new ArgumentNullException(nameof(addUserFriendModel));
+            }
+
+            var friendsRepository = _unitOfWork.GetRepository<IFriendsRepository>();
+            if (friendsRepository
+                .Find(req => req.User1Id == addUserFriendModel.UserId || req.User2Id == addUserFriendModel.FriendId)
+                .Any())
+            {
+                throw new InvalidOperationException("Friend request already exists.");
+            }
+
+            var friendRequest = new Friend
+            {
+                Accepted = false,
+                User1Id = addUserFriendModel.UserId,
+                User2Id = addUserFriendModel.FriendId,
+            };
+            await _unitOfWork.GetRepository<IFriendsRepository>().AddAsync(friendRequest);
+            _ = await _unitOfWork.CompleteAsync();
+
+            return new FriendModel
+            {
+                Accepted = friendRequest.Accepted,
+                Id = friendRequest.Id,
+                User1Id = friendRequest.User1Id,
+                User2Id = friendRequest.User2Id,
+            };
+        }
+
         public async Task<UserModel> GetUserAsync(int id)
         {
             if (_isDisposed)
@@ -69,6 +107,28 @@ namespace Nvisibl.Business
                     .FirstOrDefault();
                 return user is null ? null : Mappers.ToUserModel(user);
             });
+        }
+
+        public async Task<FriendModel> GetFriendRequestAsync(int id)
+        {
+            if (_isDisposed)
+            {
+                throw new ObjectDisposedException(GetType().Name);
+            }
+
+            if (id < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(id), id, string.Empty);
+            }
+
+            var friendRequest = await _unitOfWork.GetRepository<IFriendsRepository>().GetAsync(id);
+            return new FriendModel
+            {
+                Accepted = friendRequest.Accepted,
+                Id = friendRequest.Id,
+                User1Id = friendRequest.User1Id,
+                User2Id = friendRequest.User2Id,
+            };
         }
 
         public async Task<IEnumerable<UserModel>> GetUsersAsync(int page = 0, int pageSize = 10)
@@ -112,7 +172,32 @@ namespace Nvisibl.Business
                 .ToList();
         }
 
-        public async Task AddUserFriendAsync(AddUserFriendModel addUserFriendModel)
+        public async Task<IEnumerable<FriendModel>> GetUserFriendRequestsAsync(int id)
+        {
+            if (_isDisposed)
+            {
+                throw new ObjectDisposedException(GetType().Name);
+            }
+
+            if (id < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(id), id, string.Empty);
+            }
+
+            return await Task.Run(() =>
+                _unitOfWork.GetRepository<IFriendsRepository>()
+                .Find(f => (f.User1Id == id || f.User2Id == id) && !f.Accepted, maxCount: 50)
+                .Select(f => new FriendModel
+                {
+                    Accepted = f.Accepted,
+                    Id = f.Id,
+                    User1Id = f.User1Id,
+                    User2Id = f.User2Id,
+                })
+                .ToList());
+        }
+
+        public async Task<FriendModel> AddUserFriendAsync(AddUserFriendModel addUserFriendModel)
         {
             if (_isDisposed)
             {
@@ -127,11 +212,68 @@ namespace Nvisibl.Business
             await EnsureUserExistsAsync(addUserFriendModel.UserId);
             await EnsureUserExistsAsync(addUserFriendModel.FriendId);
 
-            await _unitOfWork.GetRepository<IFriendsRepository>().AddAsync(new Friend
+            var friend = new Friend
             {
+                Accepted = true,
                 User1Id = addUserFriendModel.UserId,
                 User2Id = addUserFriendModel.FriendId,
-            });
+            };
+            await _unitOfWork.GetRepository<IFriendsRepository>().AddAsync(friend);
+            _ = await _unitOfWork.CompleteAsync();
+
+            return new FriendModel
+            {
+                Accepted = friend.Accepted,
+                Id = friend.Id,
+                User1Id = friend.User1Id,
+                User2Id = friend.User2Id,
+            };
+        }
+
+        public async Task AcceptFriendRequestAsync(int id)
+        {
+            if (_isDisposed)
+            {
+                throw new ObjectDisposedException(GetType().Name);
+            }
+
+            if (id < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(id), id, string.Empty);
+            }
+
+            var friendsRepository = _unitOfWork.GetRepository<IFriendsRepository>();
+            var friendRequest = await friendsRepository.GetAsync(id);
+            if (friendRequest is null)
+            {
+                throw new InvalidOperationException($"Friend request with id ({id}) does not exist.");
+            }
+
+            friendRequest.Accepted = true;
+            friendsRepository.Update(friendRequest);
+            _ = await _unitOfWork.CompleteAsync();
+        }
+
+        public async Task RejectFriendRequestAsync(int id)
+        {
+            if (_isDisposed)
+            {
+                throw new ObjectDisposedException(GetType().Name);
+            }
+
+            if (id < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(id), id, string.Empty);
+            }
+
+            var friendsRepository = _unitOfWork.GetRepository<IFriendsRepository>();
+            var friendRequest = await friendsRepository.GetAsync(id);
+            if (friendRequest is null)
+            {
+                throw new InvalidOperationException($"Friend request with id ({id}) does not exist.");
+            }
+
+            friendsRepository.Remove(friendRequest);
             _ = await _unitOfWork.CompleteAsync();
         }
 

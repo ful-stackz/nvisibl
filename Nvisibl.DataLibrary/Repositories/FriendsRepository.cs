@@ -19,7 +19,7 @@ namespace Nvisibl.DataLibrary.Repositories
         public async Task<IEnumerable<User>> GetAllFriendsAsync(User user)
         {
             return await Context.Set<Friend>()
-                .Where(f => f.User1Id == user.Id || f.User2Id == user.Id)
+                .Where(f => (f.User1Id == user.Id || f.User2Id == user.Id) && f.Accepted)
                 .Include(f => f.User1)
                 .Include(f => f.User2)
                 .Select(f => user.Id == f.User1Id ? f.User2 : f.User1)
