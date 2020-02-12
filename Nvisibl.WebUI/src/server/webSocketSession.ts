@@ -1,6 +1,6 @@
 import { Subject, BehaviorSubject } from 'rxjs';
 import messageParser from './messages/messageParser';
-import AuthDetails from '../models/authDetails';
+import AuthDetails, { AuthToken } from '../models/authDetails';
 import User from '../models/user';
 import ClientMessage from './messages/client/clientMessage';
 import ServerMessage from './messages/server/serverMessage';
@@ -18,7 +18,7 @@ export default class WebSocketSession {
     private readonly ConnectionRetryInterval: number = 5000;
     private readonly _address: string;
     private readonly _user: User;
-    private _accessToken: string;
+    private _accessToken: AuthToken;
     private _webSocket: WebSocket;
     private _isConnected: boolean;
     private _connectionTask: NodeJS.Timeout | null;
@@ -29,7 +29,7 @@ export default class WebSocketSession {
         if (!auth) throw new Error('Invalid auth.');
         this._address = address;
         this._user = auth.user;
-        this._accessToken = auth.accessToken;
+        this._accessToken = auth.authToken;
         this._connectionTask = setInterval(
             () => this.tryConnect(),
             this.ConnectionRetryInterval,
@@ -44,7 +44,7 @@ export default class WebSocketSession {
     public readonly receivedMessages: Subject<ServerMessage>;
     public readonly connectionState: BehaviorSubject<WebSocketConnectionState>;
 
-    public changeAccessToken(accessToken: string): void {
+    public changeAccessToken(accessToken: AuthToken): void {
         this._accessToken = accessToken;
     }
 
@@ -100,7 +100,7 @@ export default class WebSocketSession {
             clearInterval(this._connectionTask);
             const message = messageParser.serializeClientMessage(new ConnectionRequest(
                 this._user.id,
-                this._accessToken,
+                this._accessToken.token,
             ));
             if (message) this._webSocket.send(message);
         };

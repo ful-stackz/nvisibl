@@ -27,8 +27,8 @@
         if (!sessionManager) throw new Error('SessionManager prop is not provided.');
 
         const session = sessionManager.get();
-        const { user, accessToken } = session.auth;
-        api.get(`users/${user.id}/chatrooms`, null, accessToken)
+        const { user, authToken: { token } } = session.auth;
+        api.get(`users/${user.id}/chatrooms`, null, token)
             .then(({ data }) => {
                 if (!data.chatrooms) {
                     isLoading = false;

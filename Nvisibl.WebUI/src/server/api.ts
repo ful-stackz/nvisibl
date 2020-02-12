@@ -22,7 +22,7 @@ export default class Api {
         });
     }
 
-    public post(endpoint: string, data: any, authToken?: string) {
+    public post(endpoint: string, data: any, authToken?: string): Promise<{ data:any }> {
         if (!endpoint) throw new Error('Invalid endpoint.');
         const url = this._baseAddress + endpoint;
         const headers = { ...Api.makeAuthHeader(authToken) };
