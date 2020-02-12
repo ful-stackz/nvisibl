@@ -108,7 +108,7 @@ namespace Nvisibl.Cloud.Controllers
                     algorithm: JwtConfiguration.SecurityAlgorithm
                 );
                 var createdAt = DateTime.UtcNow;
-                var validBefore = DateTime.UtcNow.AddMinutes(5);
+                var validBefore = createdAt.AddMinutes(5);
                 var token = new JwtSecurityToken(
                     issuer: jwtConfig.Issuer,
                     audience: jwtConfig.Audience,
@@ -149,7 +149,7 @@ namespace Nvisibl.Cloud.Controllers
                     algorithm: JwtConfiguration.SecurityAlgorithm
                 );
                 var createdAt = DateTime.UtcNow;
-                var validBefore = DateTime.UtcNow.AddMinutes(30);
+                var validBefore = createdAt.AddMinutes(30);
                 var token = new JwtSecurityToken(
                     issuer: jwtConfig.Issuer,
                     audience: jwtConfig.Audience,
