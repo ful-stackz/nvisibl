@@ -16,7 +16,7 @@ namespace Nvisibl.DataLibrary.Repositories.Interfaces
 
         Task AddRangeAsync(IEnumerable<TEntity> entities);
 
-        IEnumerable<TEntity> Find(Expression<Func<TEntity, bool>> predicate);
+        IEnumerable<TEntity> Find(Expression<Func<TEntity, bool>> predicate, int maxCount = 20);
 
         TEntity Get(int id);
 

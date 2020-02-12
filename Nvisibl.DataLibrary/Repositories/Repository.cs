@@ -58,14 +58,19 @@ namespace Nvisibl.DataLibrary.Repositories
             await Context.Set<TEntity>().AddRangeAsync(entities);
         }
 
-        public virtual IEnumerable<TEntity> Find(Expression<Func<TEntity, bool>> predicate)
+        public virtual IEnumerable<TEntity> Find(Expression<Func<TEntity, bool>> predicate, int maxCount = 20)
         {
             if (predicate is null)
             {
                 throw new ArgumentNullException(nameof(predicate));
             }
 
-            return Context.Set<TEntity>().Where(predicate);
+            if (maxCount < 1)
+            {
+                throw new ArgumentOutOfRangeException(nameof(maxCount), maxCount, string.Empty);
+            }
+
+            return Context.Set<TEntity>().Where(predicate).Take(maxCount);
         }
 
         public virtual TEntity Get(int id)

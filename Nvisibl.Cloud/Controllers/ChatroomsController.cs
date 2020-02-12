@@ -7,6 +7,8 @@ using Nvisibl.Cloud.Models.Responses;
 using System;
 using System.Threading.Tasks;
 using System.Linq;
+using Microsoft.AspNetCore.Authorization;
+using Nvisibl.Cloud.Authentication;
 
 namespace Nvisibl.Cloud.Controllers
 {
@@ -124,6 +126,35 @@ namespace Nvisibl.Cloud.Controllers
             }
         }
 
+        [Authorize(AuthenticationSchemes = JwtSchemes.Admin + "," + JwtSchemes.User)]
+        [HttpGet("{id}/messages")]
+        public async Task<IActionResult> GetChatroomMessages(
+            int id,
+            [FromServices] IMessagesManager messagesManager,
+            [FromQuery] DateTime? olderThan = null,
+            [FromQuery] int pageSize = 20)
+        {
+            try
+            {
+                var messages = await messagesManager.GetChatroomMessagesAsync(
+                    id,
+                    olderThan ?? DateTime.UtcNow,
+                    pageSize);
+                return new JsonResult(messages.Select(m => new MessageResponse
+                {
+                    AuthorId = m.AuthorId,
+                    Body = m.Body,
+                    ChatroomId = m.ChatroomId,
+                    Id = m.Id,
+                    TimeSentUtc = m.TimeSentUtc,
+                }));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, $"Could not retrieve messages for chatroom with id ({id}).");
+                return BadRequest();
+            }
+        }
 
         [HttpPost("{id}/users")]
         public async Task<ActionResult> AddUserAsync(

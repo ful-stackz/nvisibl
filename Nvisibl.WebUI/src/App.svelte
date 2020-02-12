@@ -51,7 +51,7 @@
             </div>
             <div class="ml-2 w-3/4">
                 <div style="height: 90%;">
-                    <MessagePanel {sessionManager} />
+                    <MessagePanel {api} {sessionManager} />
                 </div>
                 <div class="py-2" style="height: 10%;">
                     <MessageComposer {sessionManager} />

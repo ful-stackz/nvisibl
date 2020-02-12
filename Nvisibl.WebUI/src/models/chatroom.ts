@@ -12,4 +12,5 @@ export default class Chatroom {
     public readonly name: string;
     public readonly isShared: boolean;
     public readonly users: User[];
+    public initialLoadComplete: boolean = false;
 }
