@@ -28,7 +28,7 @@
             .then(({ data }) => {
                 inError = false;
                 sessionManager.startSession(new AuthDetails(
-                    data.accessToken,
+                    data.auth.accessToken,
                     new User(data.userId, username),
                 ));
                 username = '';

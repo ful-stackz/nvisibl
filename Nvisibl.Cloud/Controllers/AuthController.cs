@@ -107,19 +107,22 @@ namespace Nvisibl.Cloud.Controllers
                     key: jwtConfig.SecurityKey,
                     algorithm: JwtConfiguration.SecurityAlgorithm
                 );
+                var createdAt = DateTime.UtcNow;
+                var validBefore = DateTime.UtcNow.AddMinutes(5);
                 var token = new JwtSecurityToken(
                     issuer: jwtConfig.Issuer,
                     audience: jwtConfig.Audience,
                     claims: jwtClaims,
-                    notBefore: DateTime.Now,
-                    expires: DateTime.Now.AddMinutes(5),
+                    notBefore: createdAt,
+                    expires: validBefore,
                     signingCredentials: signingCredentials);
 
-                return new JsonResult(new AuthLoginResponse
-                {
-                    AccessToken = new JwtSecurityTokenHandler().WriteToken(token),
-                    UserId = chatUser!.Id,
-                });
+                return new JsonResult(new AuthLoginResponse(
+                    userId: chatUser!.Id,
+                    auth: new AuthTokenResponse(
+                        accessToken: new JwtSecurityTokenHandler().WriteToken(token),
+                        createdAt: createdAt.ToString("o"),
+                        validBefore: validBefore.ToString("o"))));
             }
             catch (Exception ex)
             {
