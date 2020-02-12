@@ -1,10 +1,12 @@
 <script lang="ts">
     import { onMount, onDestroy } from 'svelte';
+    import Api from '../server/api';
     import User from '../models/user';
     import Message from '../models/message';
     import Chatroom from '../models/chatroom';
     import SessionManager from '../services/sessionManager';
 
+    export let api: Api = null;
     export let sessionManager: SessionManager = null;
 
     let visibleMessages: Message[] = [];
@@ -21,28 +23,51 @@
     const chatroomsSub = sessionManager.get().chatService.onActiveChatroomChange.subscribe((next) => {
         if (!next || (chatroom && chatroom.id === next.id)) return;
         chatroom = next;
-        visibleMessages = sessionManager.get().messages.getChatroomMessages(next);
+        loadChatroomMessages();
     });
+
+    function loadChatroomMessages(): void {
+        if (chatroom.initialLoadComplete) {
+            visibleMessages = sessionManager.get().messages.getChatroomMessages(chatroom);
+            return;
+        }
+
+        visibleMessages = [];
+        const { auth: { accessToken }, chatrooms, messages } = sessionManager.get();
+        api.get(`chatrooms/${chatroom.id}/messages`, null, accessToken)
+            .then(({ data }) => {
+                data.forEach((msg) => {
+                    messages.add(new Message(
+                        msg.messageId,
+                        msg.authorId,
+                        msg.chatroomId,
+                        msg.body,
+                        new Date(msg.timeSentUTC),
+                    ));
+                });
+                chatroom.initialLoadComplete = true;
+                chatrooms.update(chatroom);
+            })
+            .catch(console.error);
+    }
 
     function ownsMessage(message: Message): boolean {
         return message.authorId === user.id;
     }
 
     onMount((): void => {
+        if (!api) throw new Error('Api prop is not provided.');
         if (!sessionManager) throw new Error('SessionManager prop is not provided.');
 
         const session = sessionManager.get();
         user = session.auth.user;
-        chatroom = session.chatrooms.getAll()[0];
-        if (!chatroom) {
-            const subscription = session.chatrooms.onChange.subscribe((chatrooms) => {
-                if (chatrooms.length > 0) {
-                    chatroom = chatrooms[0];
-                    session.chatService.setActiveChatroom(chatroom);
-                    subscription.unsubscribe();
-                }
-            });
-        }
+        
+        const subscription = session.chatrooms.onChange.subscribe((chatrooms) => {
+            if (chatrooms.length > 0) {
+                session.chatService.setActiveChatroom(chatrooms[0]);
+                subscription.unsubscribe();
+            }
+        });
     });
 
     onDestroy(() => {
