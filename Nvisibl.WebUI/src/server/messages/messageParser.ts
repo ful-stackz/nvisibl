@@ -30,9 +30,9 @@ const deserializeServerMessage = (message: string): ServerMessage => {
 
         case ServerMessageTypes.ChatMessage:
             return new serverMessages.ReceiveChatMessage(
+                json.payload.messageId,
                 json.payload.authorId,
                 json.payload.chatroomId,
-                json.payload.id,
                 json.payload.body,
                 json.payload.timeSentUtc,
             );

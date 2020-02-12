@@ -7,6 +7,5 @@ export default class ConnectionRequest implements ClientMessage {
     }
 
     public readonly userId: number;
-
     public readonly accessToken: string;
 }

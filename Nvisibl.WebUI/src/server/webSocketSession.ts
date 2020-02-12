@@ -1,5 +1,6 @@
 import { Subject, BehaviorSubject } from 'rxjs';
 import messageParser from './messages/messageParser';
+import AuthDetails from '../models/authDetails';
 import User from '../models/user';
 import ClientMessage from './messages/client/clientMessage';
 import ServerMessage from './messages/server/serverMessage';
@@ -15,28 +16,20 @@ export enum WebSocketConnectionState {
 
 export default class WebSocketSession {
     private readonly ConnectionRetryInterval: number = 5000;
-
     private readonly _address: string;
-
     private readonly _user: User;
-
     private _accessToken: string;
-
     private _webSocket: WebSocket;
-
     private _isConnected: boolean;
-
     private _connectionTask: NodeJS.Timeout | null;
-
     private _closeRequested: boolean;
 
-    constructor(address: string, user: User, accessToken: string) {
+    constructor(address: string, auth: AuthDetails) {
         if (!address) throw new Error('Invalid address.');
-        if (!user) throw new Error('Invalid user.');
-        if (!accessToken) throw new Error('Invalid access token.');
+        if (!auth) throw new Error('Invalid auth.');
         this._address = address;
-        this._user = user;
-        this._accessToken = accessToken;
+        this._user = auth.user;
+        this._accessToken = auth.accessToken;
         this._connectionTask = setInterval(
             () => this.tryConnect(),
             this.ConnectionRetryInterval,
@@ -49,7 +42,6 @@ export default class WebSocketSession {
     }
 
     public readonly receivedMessages: Subject<ServerMessage>;
-
     public readonly connectionState: BehaviorSubject<WebSocketConnectionState>;
 
     public changeAccessToken(accessToken: string): void {

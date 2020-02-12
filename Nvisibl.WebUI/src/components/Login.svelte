@@ -1,10 +1,12 @@
 <script lang="ts">
     import { onMount } from 'svelte'
-    import session from '../stores/session';
     import Api from '../server/api';
+    import AuthDetails from '../models/authDetails';
     import User from '../models/user';
+    import SessionManager from '../services/sessionManager';
 
     export let api: Api = null;
+    export let sessionManager: SessionManager = null;
 
     let username: string;
     let password: string;
@@ -14,6 +16,7 @@
 
     onMount(() => {
         if (!api) throw new Error('Api prop is not provided.');
+        if (!sessionManager) throw new Error('SessionManager prop is not provided');
     });
 
     function login(): void {
@@ -24,7 +27,10 @@
         api.post('auth/login', { username, password })
             .then(({ data }) => {
                 inError = false;
-                session.set(data.accessToken, new User(data.userId, username));
+                sessionManager.startSession(new AuthDetails(
+                    data.accessToken,
+                    new User(data.userId, username),
+                ));
                 username = '';
                 password = '';
             })

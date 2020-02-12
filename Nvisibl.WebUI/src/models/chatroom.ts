@@ -9,10 +9,7 @@ export default class Chatroom {
     }
 
     public readonly id: number;
-
     public readonly name: string;
-
     public readonly isShared: boolean;
-
     public readonly users: User[];
 }
