@@ -46,7 +46,7 @@ namespace Nvisibl.Cloud.WebSockets
                         AuthorId = msg.AuthorId,
                         Body = msg.Body,
                         ChatroomId = msg.ChatroomId,
-                        TimeSentUtc = DateTime.Parse(msg.TimeSentUtc),
+                        TimeSentUtc = DateTime.Parse(msg.TimeSentUtc).ToUniversalTime(),
                     })));
 
             var chatrooms = chatroomsManager.GetUserChatroomsAsync(new Business.Models.Users.UserModel { Id = userId })
