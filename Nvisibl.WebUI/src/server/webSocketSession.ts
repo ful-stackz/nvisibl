@@ -16,19 +16,12 @@ export enum WebSocketConnectionState {
 
 export default class WebSocketSession {
     private readonly ConnectionRetryInterval: number = 5000;
-
     private readonly _address: string;
-
     private readonly _user: User;
-
     private _accessToken: string;
-
     private _webSocket: WebSocket;
-
     private _isConnected: boolean;
-
     private _connectionTask: NodeJS.Timeout | null;
-
     private _closeRequested: boolean;
 
     constructor(address: string, auth: AuthDetails) {
@@ -49,7 +42,6 @@ export default class WebSocketSession {
     }
 
     public readonly receivedMessages: Subject<ServerMessage>;
-
     public readonly connectionState: BehaviorSubject<WebSocketConnectionState>;
 
     public changeAccessToken(accessToken: string): void {

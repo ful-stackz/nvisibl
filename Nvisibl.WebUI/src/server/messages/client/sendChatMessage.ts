@@ -14,10 +14,7 @@ export default class SendChatMessage implements ClientMessage {
     }
 
     public readonly authorId: number;
-
     public readonly chatroomId: number;
-
     public readonly body: string;
-
     public readonly timeSentUTC: string;
 }

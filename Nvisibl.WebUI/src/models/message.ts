@@ -14,12 +14,8 @@ export default class Message {
     }
 
     public readonly id: number;
-
     public readonly authorId: number;
-
     public readonly chatroomId: number;
-
     public readonly body: string;
-
     public readonly timeSentUTC: Date;
 }
