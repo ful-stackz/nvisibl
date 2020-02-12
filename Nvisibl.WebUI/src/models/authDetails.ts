@@ -1,21 +1,19 @@
-import { BehaviorSubject } from 'rxjs';
 import User from './user';
 
+export interface AuthToken {
+    token: string,
+    createdAt: Date,
+    validBefore: Date,
+}
+
 export default class AuthDetails {
-    constructor(accessToken: string, user: User) {
-        if (!accessToken) throw new Error('Invalid access token.');
+    constructor(user: User, token: AuthToken) {
         if (!user) throw new Error('Invalid user.');
-        this.accessToken = accessToken;
+        if (!token) throw new Error('Invalid token.');
         this.user = user;
-        this.onChange = new BehaviorSubject<AuthDetails>(this);
+        this.authToken = token;
     }
 
     public readonly user: User;
-    public readonly onChange: BehaviorSubject<AuthDetails>;
-    public accessToken: string;
-
-    public changeAccessToken(accessToken: string): void {
-        this.accessToken = accessToken;
-        this.onChange.next(this);
-    }
+    public readonly authToken: AuthToken;
 }

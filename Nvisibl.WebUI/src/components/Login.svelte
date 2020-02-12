@@ -28,8 +28,12 @@
             .then(({ data }) => {
                 inError = false;
                 sessionManager.startSession(new AuthDetails(
-                    data.auth.accessToken,
                     new User(data.userId, username),
+                    {
+                        token: data.auth.accessToken,
+                        createdAt: new Date(data.auth.createdAt),
+                        validBefore: new Date(data.auth.validBefore),
+                    },
                 ));
                 username = '';
                 password = '';

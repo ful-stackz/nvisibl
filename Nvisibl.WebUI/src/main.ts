@@ -4,7 +4,7 @@ import SessionManager from './services/sessionManager';
 
 const api: Api = new Api('https://localhost:5001/api/');
 const webSocketAddress: string = 'wss://localhost:5001/ws/chat';
-const sessionManager = new SessionManager(webSocketAddress);
+const sessionManager = new SessionManager(api, webSocketAddress);
 
 const app = new App({
     target: document.body,

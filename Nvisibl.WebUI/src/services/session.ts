@@ -17,7 +17,7 @@ export default class Session {
         this.chatService = new ChatService(this);
     }
 
-    public readonly auth: AuthDetails;
+    public auth: AuthDetails;
     public readonly webSocketSession: WebSocketSession;
     public readonly chatrooms: ChatroomsStore;
     public readonly friends: FriendsStore;

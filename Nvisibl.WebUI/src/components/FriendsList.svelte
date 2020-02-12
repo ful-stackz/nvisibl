@@ -19,8 +19,8 @@
         if (!api) throw new Error('Api prop is not provided.');
         if (!sessionManager) throw new Error('SessionManager prop is not provided.');
         const session = sessionManager.get();
-        const { user, accessToken } = session.auth;
-        api.get(`users/${user.id}/friends`, null, accessToken)
+        const { user, authToken: { token } } = session.auth;
+        api.get(`users/${user.id}/friends`, null, token)
             .then(({ data }) => {
                 if (!data) {
                     isLoading = false;
@@ -63,14 +63,14 @@
     }
 
     async function createPrivateChatroom(friend: User): Promise<Chatroom> {
-        const { user, accessToken } = sessionManager.get().auth;
+        const { user, authToken: { token } } = sessionManager.get().auth;
         const { data } = await api.post(
             'chatrooms',
             {
                 ownerId: user.id,
                 isShared: false,
             },
-            accessToken,
+            token,
         );
         const chatroom = new Chatroom(data.id, friend.username, data.isShared, [user, friend]);
         await api.post(
@@ -78,7 +78,7 @@
             {
                 userId: friend.id,
             },
-            accessToken,
+            token,
         );
         return chatroom;
     }

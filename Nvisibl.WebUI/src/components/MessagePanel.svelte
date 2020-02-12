@@ -33,8 +33,8 @@
         }
 
         visibleMessages = [];
-        const { auth: { accessToken }, chatrooms, messages } = sessionManager.get();
-        api.get(`chatrooms/${chatroom.id}/messages`, null, accessToken)
+        const { auth: { authToken: { token } }, chatrooms, messages } = sessionManager.get();
+        api.get(`chatrooms/${chatroom.id}/messages`, null, token)
             .then(({ data }) => {
                 data.forEach((msg) => {
                     messages.add(new Message(
