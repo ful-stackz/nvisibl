@@ -24,7 +24,8 @@ namespace Nvisibl.DataLibrary.Contexts
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
-            builder.Entity<Friend>().HasKey(e => new { e.User1Id, e.User2Id });
+            builder.Entity<Friend>().HasKey(e => e.Id);
+            builder.Entity<Friend>().HasAlternateKey(e => new { e.User1Id, e.User2Id });
 
             builder.Entity<Friend>()
                 .HasOne(f => f.User1)

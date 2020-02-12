@@ -14,7 +14,8 @@ namespace Nvisibl.DataLibrary.Migrations
                 {
                     Id = table.Column<int>(nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    Name = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
+                    Name = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false),
+                    IsShared = table.Column<bool>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -62,12 +63,16 @@ namespace Nvisibl.DataLibrary.Migrations
                 name: "Friends",
                 columns: table => new
                 {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     User1Id = table.Column<int>(nullable: false),
-                    User2Id = table.Column<int>(nullable: false)
+                    User2Id = table.Column<int>(nullable: false),
+                    Accepted = table.Column<bool>(nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Friends", x => new { x.User1Id, x.User2Id });
+                    table.PrimaryKey("PK_Friends", x => x.Id);
+                    table.UniqueConstraint("AK_Friends_User1Id_User2Id", x => new { x.User1Id, x.User2Id });
                     table.ForeignKey(
                         name: "FK_Friends_Users_User1Id",
                         column: x => x.User1Id,
