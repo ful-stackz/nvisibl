@@ -294,6 +294,10 @@ namespace Nvisibl.Cloud.Controllers
                     Receiver = new BasicUserResponse { Id = receiver.Id, Username = receiver.Username },
                 });
             }
+            catch (InvalidOperationException)
+            {
+                return Conflict();
+            }
             catch (Exception ex)
             {
                 _logger.LogWarning(ex, $"Could not send friend request to user with id ({id}).");
