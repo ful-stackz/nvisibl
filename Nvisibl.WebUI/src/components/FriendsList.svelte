@@ -27,6 +27,10 @@
     let friendRequests: FriendRequest[] = [];
     let friendRequestsIsLoading: boolean = true;
     let friendRequestsInError: boolean = false;
+    let addFriendUsername: string = '';
+    let addFriendMessage: string = '';
+    let addFriendMessageColor: string = '';
+    let addFriendMessageTimeout: NodeJS.Timeout = null;
 
     const friendsSub = sessionManager.get().friends.onChange
         .subscribe((current) => visibleFriends = current);
@@ -35,7 +39,7 @@
         .subscribe((request) => {
             if (friendRequests.find((req) => req.id === request.id)) {
                 friendRequests = friendRequests.filter((req) => req.id !== request.id);
-            } else if (!request.accepted) {
+            } else if (!request.accepted && request.sender.id !== user.id) {
                 friendRequests = [...friendRequests, request];
             }
         });
@@ -124,6 +128,60 @@
         api.post(`users/${user.id}/friend-requests/${request.id}`, { accept }, token)
             .catch(console.error);
     }
+
+    function showFriendMessage(message: string, type: string): void {
+        switch (type) {
+            case 'success':
+                addFriendMessageColor = 'text-green-400';
+                break;
+
+            case 'warning':
+                addFriendMessageColor = 'text-orange-500';
+                break;
+
+            case 'error':
+                addFriendMessageColor = 'text-red-400';
+                break;
+        }
+        addFriendMessage = message;
+        clearInterval(addFriendMessageTimeout);
+        addFriendMessageTimeout = setTimeout(() => addFriendMessage = '', 4000);
+    }
+
+    function sendFriendRequest(): void {
+        if (!addFriendUsername) return;
+        const friendUsername = addFriendUsername;
+        addFriendUsername = '';
+        const { user, authToken: { token } } = sessionManager.get().auth;
+        if (friendUsername === user.username) {
+            showFriendMessage('Cannot add yourself as a friend.', 'warning');
+            return;
+        } else if (visibleFriends.find((f) => f.username === friendUsername)) {
+            showFriendMessage(`${friendUsername} is already a friend.`, 'warning');
+            return;
+        }
+
+        api.get('users/find', { username: friendUsername }, token)
+            .then(({ data }: { data: { id: number, username: string } }) => {
+                api.post(`users/${data.id}/friend-requests`, { senderId: user.id }, token)
+                    .then(() => showFriendMessage('Friend request sent!', 'success'))
+                    .catch((error) => {
+                        console.error(error);
+                        const { response } = error;
+                        if (response.status === 409) showFriendMessage('Friend request has already been sent.', 'warning');
+                        else showFriendMessage('Could not send friend request.', 'error');
+                    });
+            })
+            .catch((error) => {
+                console.error(error);
+                const { response } = error;
+                if (response.status === 404) showFriendMessage(`${friendUsername} does not exist.`, 'error');
+            });
+    }
+
+    function sendFriendRequestOnEnter(e: KeyboardEvent): void {
+        if (e.keyCode === 13) sendFriendRequest();
+    }
 </script>
 
 <div class="bg-gray-200 p-3 rounded">
@@ -142,10 +200,10 @@
     {:else if inError}
         <div class="text-red-800">Could not load friends</div>
     {:else}
-        <div>No friends</div>
+        <div class="text-xs">No friends</div>
     {/if}
 
-    <div class="text-lg">Friend requests</div>
+    <div class="text-lg mt-2">Friend requests</div>
     {#if friendRequestsIsLoading}
         <div>Loading...</div>
     {:else if friendRequests.length > 0}
@@ -173,6 +231,24 @@
     {:else if friendRequestsInError}
         <div class="text-red-800">Could not load friends</div>
     {:else}
-        <div>No requests</div>
+        <div class="text-xs">No requests</div>
     {/if}
+
+    <div class="text-lg mt-2">Send friend request</div>
+    <div class="flex flex-row mt-2">
+        <div class="flex-grow mr-2">
+            <input
+                class="w-full rounded p-1"
+                placeholder="Friend username..."
+                type="text"
+                bind:value={addFriendUsername}
+                on:keyup={sendFriendRequestOnEnter} />
+        </div>
+        <div class="flex-none self-center rounded-full w-8 h-8 {!!addFriendUsername ? 'cursor-pointer' : 'cursor-not-allowed'} hover:bg-gray-400 p-1" on:click={sendFriendRequest}>
+            <svg viewBox="0 0 20 20">
+                <path fill="current" d="M16.999,4.975L16.999,4.975C16.999,4.975,16.999,4.975,16.999,4.975c-0.419-0.4-0.979-0.654-1.604-0.654H4.606c-0.584,0-1.104,0.236-1.514,0.593C3.076,4.928,3.05,4.925,3.037,4.943C3.034,4.945,3.035,4.95,3.032,4.953C2.574,5.379,2.276,5.975,2.276,6.649v6.702c0,1.285,1.045,2.329,2.33,2.329h10.79c1.285,0,2.328-1.044,2.328-2.329V6.649C17.724,5.989,17.441,5.399,16.999,4.975z M15.396,5.356c0.098,0,0.183,0.035,0.273,0.055l-5.668,4.735L4.382,5.401c0.075-0.014,0.145-0.045,0.224-0.045H15.396z M16.688,13.351c0,0.712-0.581,1.294-1.293,1.294H4.606c-0.714,0-1.294-0.582-1.294-1.294V6.649c0-0.235,0.081-0.445,0.192-0.636l6.162,5.205c0.096,0.081,0.215,0.122,0.334,0.122c0.118,0,0.235-0.041,0.333-0.12l6.189-5.171c0.099,0.181,0.168,0.38,0.168,0.6V13.351z"></path>
+            </svg>
+        </div>
+    </div>
+    <div class="text-sm mt-1 {addFriendMessageColor}">{addFriendMessage}</div>
 </div>
