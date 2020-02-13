@@ -19,6 +19,8 @@
             username: string,
         }
     }
+
+    let user: User = sessionManager.get().auth.user;
     let visibleFriends: User[] = [];
     let isLoading: boolean = true;
     let inError: boolean = false;
@@ -28,6 +30,15 @@
 
     const friendsSub = sessionManager.get().friends.onChange
         .subscribe((current) => visibleFriends = current);
+
+    const friendRequestsSub = sessionManager.get().friends.onFriendRequest
+        .subscribe((request) => {
+            if (friendRequests.find((req) => req.id === request.id)) {
+                friendRequests = friendRequests.filter((req) => req.id !== request.id);
+            } else if (!request.accepted) {
+                friendRequests = [...friendRequests, request];
+            }
+        });
 
     onMount(() => {
         if (!api) throw new Error('Api prop is not provided.');
@@ -63,6 +74,7 @@
 
     onDestroy(() => {
         friendsSub.unsubscribe();
+        friendRequestsSub.unsubscribe();
     });
 
     function handleFriendClick(friend: User): void {
@@ -132,6 +144,7 @@
     {:else}
         <div>No friends</div>
     {/if}
+
     <div class="text-lg">Friend requests</div>
     {#if friendRequestsIsLoading}
         <div>Loading...</div>
