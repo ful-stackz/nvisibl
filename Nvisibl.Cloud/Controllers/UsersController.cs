@@ -93,6 +93,25 @@ namespace Nvisibl.Cloud.Controllers
             }
         }
 
+        [Authorize(AuthenticationSchemes = JwtSchemes.User)]
+        [HttpGet("find")]
+        public async Task<IActionResult> FindUserAsync(
+            [FromQuery] string username)
+        {
+            try
+            {
+                var user = await _userManager.GetUserAsync(username);
+                return user is null
+                    ? (IActionResult)NotFound()
+                    : new JsonResult(new BasicUserResponse { Id = user.Id, Username = user.Username });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, $"Could not find user with username {username}.");
+                return BadRequest();
+            }
+        }
+
         [HttpGet("{id}/friends")]
         public async Task<ActionResult> GetFriendsAsync(int id)
         {
