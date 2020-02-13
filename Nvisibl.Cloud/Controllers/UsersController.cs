@@ -9,8 +9,10 @@ using Microsoft.IdentityModel.JsonWebTokens;
 using Nvisibl.Business.Interfaces;
 using Nvisibl.Business.Models.Users;
 using Nvisibl.Cloud.Authentication;
+using Nvisibl.Cloud.Models.Data;
 using Nvisibl.Cloud.Models.Requests;
 using Nvisibl.Cloud.Models.Responses;
+using Nvisibl.Cloud.Services.Interfaces;
 
 namespace Nvisibl.Cloud.Controllers
 {
@@ -19,11 +21,16 @@ namespace Nvisibl.Cloud.Controllers
     public class UsersController : ControllerBase
     {
         private readonly IUsersManager _userManager;
+        private readonly INotificationsService _notificationsService;
         private readonly ILogger<UsersController> _logger;
 
-        public UsersController(IUsersManager userManagerService, ILogger<UsersController> logger)
+        public UsersController(
+            IUsersManager userManagerService,
+            INotificationsService notificationsService,
+            ILogger<UsersController> logger)
         {
             _userManager = userManagerService ?? throw new ArgumentNullException(nameof(userManagerService));
+            _notificationsService = notificationsService ?? throw new ArgumentNullException(nameof(notificationsService));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
@@ -120,20 +127,19 @@ namespace Nvisibl.Cloud.Controllers
                 }
 
                 var friendRequests = await _userManager.GetUserFriendRequestsAsync(id);
-                var friendRequestsResponses = await Task.WhenAll(
-                    friendRequests.Select(async (req) =>
+                var friendRequestsResponses = new List<FriendRequestResponse>();
+                foreach (var friendRequest in friendRequests)
+                {
+                    var sender = await _userManager.GetUserAsync(friendRequest.User1Id);
+                    var receiver = await _userManager.GetUserAsync(friendRequest.User2Id);
+                    friendRequestsResponses.Add(new FriendRequestResponse
                     {
-                        var sender = await _userManager.GetUserAsync(req.User1Id);
-                        var receiver = await _userManager.GetUserAsync(req.User2Id);
-                        return new FriendRequestResponse
-                        {
-                            Id = req.Id,
-                            Accepted = req.Accepted,
-                            Sender = new BasicUserResponse { Id = sender.Id, Username = sender.Username },
-                            Receiver = new BasicUserResponse { Id = receiver.Id, Username = receiver.Username },
-                        };
-                    })
-                    .ToList());
+                        Id = friendRequest.Id,
+                        Accepted = friendRequest.Accepted,
+                        Sender = new BasicUserResponse { Id = sender.Id, Username = sender.Username },
+                        Receiver = new BasicUserResponse { Id = receiver.Id, Username = receiver.Username },
+                    });
+                }
                 return new JsonResult(friendRequestsResponses);
             }
             catch (Exception ex)
@@ -255,6 +261,12 @@ namespace Nvisibl.Cloud.Controllers
                 });
                 var sender = await _userManager.GetUserAsync(request.SenderId);
                 var receiver = await _userManager.GetUserAsync(id);
+
+                _notificationsService.SendNotification(new FriendRequestNotification(
+                    friendRequestId: friendRequest.Id,
+                    accepted: friendRequest.Accepted,
+                    sender: sender,
+                    receiver: receiver));
                 return new JsonResult(new FriendRequestResponse
                 {
                     Accepted = friendRequest.Accepted,
@@ -306,6 +318,12 @@ namespace Nvisibl.Cloud.Controllers
                 {
                     await _userManager.RejectFriendRequestAsync(friendRequestId);
                 }
+
+                _notificationsService.SendNotification(new FriendRequestNotification(
+                    friendRequestId: friendRequest.Id,
+                    accepted: request.Accept,
+                    sender: await _userManager.GetUserAsync(friendRequest.User1Id),
+                    receiver: await _userManager.GetUserAsync(friendRequest.User2Id)));
 
                 return Ok();
             }
