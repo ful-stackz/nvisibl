@@ -37,6 +37,23 @@ const deserializeServerMessage = (message: string): ServerMessage => {
                 json.payload.timeSentUtc,
             );
 
+        case ServerMessageTypes.FriendRequest: {
+            const {
+                id,
+                accepted,
+                senderId,
+                senderUsername,
+                receiverId,
+                receiverUsername,
+            } = json.payload;
+            return new serverMessages.FriendRequest({
+                id,
+                accepted,
+                sender: { id: senderId, username: senderUsername },
+                receiver: { id: receiverId, username: receiverUsername },
+            });
+        }
+
         default:
             return new serverMessages.Empty();
     }
