@@ -53,9 +53,11 @@ namespace Nvisibl.Business
             }
 
             var friendsRepository = _unitOfWork.GetRepository<IFriendsRepository>();
-            if (friendsRepository
-                .Find(req => req.User1Id == addUserFriendModel.UserId || req.User2Id == addUserFriendModel.FriendId)
-                .Any())
+            bool friendRequestExists = friendsRepository.Find(req =>
+                (req.User1Id == addUserFriendModel.UserId && req.User2Id == addUserFriendModel.FriendId) ||
+                (req.User1Id == addUserFriendModel.FriendId && req.User2Id == addUserFriendModel.UserId))
+                .Any();
+            if (friendRequestExists)
             {
                 throw new InvalidOperationException("Friend request already exists.");
             }
