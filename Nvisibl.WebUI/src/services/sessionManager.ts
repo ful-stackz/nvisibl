@@ -126,7 +126,7 @@ export default class SessionManager {
 
             const { authToken: { token }, user } = this._session.auth;
             try {
-                const { data } = await this._api.post(' auth/renew-token', { username: user.username }, token);
+                const { data } = await this._api.post('auth/renew-token', { username: user.username }, token);
                 const auth = new AuthDetails(user, {
                     createdAt: new Date(data.createdAt),
                     token: data.accessToken,
