@@ -53,13 +53,22 @@ namespace Nvisibl.DataLibrary.Migrations
 
             modelBuilder.Entity("Nvisibl.DataLibrary.Models.Friend", b =>
                 {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<bool>("Accepted")
+                        .HasColumnType("tinyint(1)");
+
                     b.Property<int>("User1Id")
                         .HasColumnType("int");
 
                     b.Property<int>("User2Id")
                         .HasColumnType("int");
 
-                    b.HasKey("User1Id", "User2Id");
+                    b.HasKey("Id");
+
+                    b.HasAlternateKey("User1Id", "User2Id");
 
                     b.HasIndex("User2Id");
 

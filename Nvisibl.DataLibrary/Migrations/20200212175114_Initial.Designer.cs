@@ -9,8 +9,8 @@ using Nvisibl.DataLibrary.Contexts;
 namespace Nvisibl.DataLibrary.Migrations
 {
     [DbContext(typeof(ChatContext))]
-    [Migration("20200207131256_AddIsSharedToChatroomModel")]
-    partial class AddIsSharedToChatroomModel
+    [Migration("20200212175114_Initial")]
+    partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -55,13 +55,22 @@ namespace Nvisibl.DataLibrary.Migrations
 
             modelBuilder.Entity("Nvisibl.DataLibrary.Models.Friend", b =>
                 {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<bool>("Accepted")
+                        .HasColumnType("tinyint(1)");
+
                     b.Property<int>("User1Id")
                         .HasColumnType("int");
 
                     b.Property<int>("User2Id")
                         .HasColumnType("int");
 
-                    b.HasKey("User1Id", "User2Id");
+                    b.HasKey("Id");
+
+                    b.HasAlternateKey("User1Id", "User2Id");
 
                     b.HasIndex("User2Id");
 

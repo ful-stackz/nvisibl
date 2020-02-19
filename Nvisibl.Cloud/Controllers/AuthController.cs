@@ -101,6 +101,7 @@ namespace Nvisibl.Cloud.Controllers
                 var jwtConfig = jwtConfiguration.GetSchemeConfig(JwtSchemes.User);
                 var jwtClaims = new Claim[]
                 {
+                    new Claim(JwtRegisteredClaimNames.Sub, chatUser!.Id.ToString()),
                     new Claim(JwtRegisteredClaimNames.UniqueName, request.Username),
                 };
                 var signingCredentials = new SigningCredentials(
@@ -139,10 +140,20 @@ namespace Nvisibl.Cloud.Controllers
         {
             try
             {
+                var subClaim = User.FindFirst(JwtRegisteredClaimNames.Sub);
+                var nameClaim = User.FindFirst(JwtRegisteredClaimNames.UniqueName);
+                if (subClaim is null ||
+                    nameClaim is null ||
+                    !nameClaim.Value.Equals(request.Username, StringComparison.OrdinalIgnoreCase))
+                {
+                    return BadRequest();
+                }
+
                 var jwtConfig = jwtConfiguration.GetSchemeConfig(JwtSchemes.User);
                 var jwtClaims = new Claim[]
                 {
-                    new Claim(JwtRegisteredClaimNames.UniqueName, request.Username),
+                    subClaim,
+                    nameClaim,
                 };
                 var signingCredentials = new SigningCredentials(
                     key: jwtConfig.SecurityKey,

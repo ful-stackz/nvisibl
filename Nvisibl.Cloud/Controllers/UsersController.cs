@@ -5,11 +5,14 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.JsonWebTokens;
 using Nvisibl.Business.Interfaces;
 using Nvisibl.Business.Models.Users;
 using Nvisibl.Cloud.Authentication;
+using Nvisibl.Cloud.Models.Data;
 using Nvisibl.Cloud.Models.Requests;
 using Nvisibl.Cloud.Models.Responses;
+using Nvisibl.Cloud.Services.Interfaces;
 
 namespace Nvisibl.Cloud.Controllers
 {
@@ -18,11 +21,16 @@ namespace Nvisibl.Cloud.Controllers
     public class UsersController : ControllerBase
     {
         private readonly IUsersManager _userManager;
+        private readonly INotificationsService _notificationsService;
         private readonly ILogger<UsersController> _logger;
 
-        public UsersController(IUsersManager userManagerService, ILogger<UsersController> logger)
+        public UsersController(
+            IUsersManager userManagerService,
+            INotificationsService notificationsService,
+            ILogger<UsersController> logger)
         {
             _userManager = userManagerService ?? throw new ArgumentNullException(nameof(userManagerService));
+            _notificationsService = notificationsService ?? throw new ArgumentNullException(nameof(notificationsService));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
@@ -85,6 +93,25 @@ namespace Nvisibl.Cloud.Controllers
             }
         }
 
+        [Authorize(AuthenticationSchemes = JwtSchemes.User)]
+        [HttpGet("find")]
+        public async Task<IActionResult> FindUserAsync(
+            [FromQuery] string username)
+        {
+            try
+            {
+                var user = await _userManager.GetUserAsync(username);
+                return user is null
+                    ? (IActionResult)NotFound()
+                    : new JsonResult(new BasicUserResponse { Id = user.Id, Username = user.Username });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, $"Could not find user with username {username}.");
+                return BadRequest();
+            }
+        }
+
         [HttpGet("{id}/friends")]
         public async Task<ActionResult> GetFriendsAsync(int id)
         {
@@ -100,6 +127,43 @@ namespace Nvisibl.Cloud.Controllers
             catch (Exception ex)
             {
                 _logger.LogWarning(ex, $"Could not friends of user with id ({id}).");
+                return BadRequest();
+            }
+        }
+
+        [Authorize(AuthenticationSchemes = JwtSchemes.User)]
+        [HttpGet("{id}/friend-requests")]
+        public async Task<IActionResult> GetFriendRequestsAsync(int id)
+        {
+            try
+            {
+                var subClaim = User.FindFirst(JwtRegisteredClaimNames.Sub);
+                if (subClaim is null ||
+                    !int.TryParse(subClaim.Value, out int idFromToken) ||
+                    idFromToken != id)
+                {
+                    return Unauthorized();
+                }
+
+                var friendRequests = await _userManager.GetUserFriendRequestsAsync(id);
+                var friendRequestsResponses = new List<FriendRequestResponse>();
+                foreach (var friendRequest in friendRequests)
+                {
+                    var sender = await _userManager.GetUserAsync(friendRequest.User1Id);
+                    var receiver = await _userManager.GetUserAsync(friendRequest.User2Id);
+                    friendRequestsResponses.Add(new FriendRequestResponse
+                    {
+                        Id = friendRequest.Id,
+                        Accepted = friendRequest.Accepted,
+                        Sender = new BasicUserResponse { Id = sender.Id, Username = sender.Username },
+                        Receiver = new BasicUserResponse { Id = receiver.Id, Username = receiver.Username },
+                    });
+                }
+                return new JsonResult(friendRequestsResponses);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, $"Could not retrieve friend requests for user with id ({id}).");
                 return BadRequest();
             }
         }
@@ -165,6 +229,7 @@ namespace Nvisibl.Cloud.Controllers
             }
         }
 
+        [Authorize(AuthenticationSchemes = JwtSchemes.Admin)]
         [HttpPost("{id}/friends")]
         public async Task<ActionResult> AddFriendAsync(
             int id,
@@ -172,16 +237,122 @@ namespace Nvisibl.Cloud.Controllers
         {
             try
             {
-                await _userManager.AddUserFriendAsync(new AddUserFriendModel
+                var friend = await _userManager.AddUserFriendAsync(new AddUserFriendModel
                 {
                     FriendId = request.UserId,
                     UserId = id,
                 });
-                return NoContent();
+                return new JsonResult(new FriendRequestResponse
+                {
+                    Accepted = friend.Accepted,
+                    Id = friend.Id,
+                    Receiver = new BasicUserResponse { Id = friend.User2Id },
+                    Sender = new BasicUserResponse { Id = friend.User1Id },
+                });
             }
             catch (Exception ex)
             {
                 _logger.LogWarning(ex, $"Could not add user ({request.UserId}) as friend to user ({id}).");
+                return BadRequest();
+            }
+        }
+
+        [Authorize(AuthenticationSchemes = JwtSchemes.User)]
+        [HttpPost("{id}/friend-requests")]
+        public async Task<IActionResult> CreateFriendRequestAsync(
+            int id,
+            [FromBody] CreateFriendRequestRequest request)
+        {
+            try
+            {
+                var subClaim = User.FindFirst(JwtRegisteredClaimNames.Sub);
+                if (subClaim is null ||
+                    !int.TryParse(subClaim.Value, out int idFromToken) ||
+                    request.SenderId != idFromToken)
+                {
+                    return Unauthorized();
+                }
+
+                var friendRequest = await _userManager.CreateFriendRequestAsync(new AddUserFriendModel
+                {
+                    UserId = request.SenderId,
+                    FriendId = id,
+                });
+                var sender = await _userManager.GetUserAsync(request.SenderId);
+                var receiver = await _userManager.GetUserAsync(id);
+
+                _notificationsService.SendNotification(new FriendRequestNotification(
+                    friendRequestId: friendRequest.Id,
+                    accepted: friendRequest.Accepted,
+                    sender: sender,
+                    receiver: receiver));
+                return new JsonResult(new FriendRequestResponse
+                {
+                    Accepted = friendRequest.Accepted,
+                    Id = friendRequest.Id,
+                    Sender = new BasicUserResponse { Id = sender.Id, Username = sender.Username },
+                    Receiver = new BasicUserResponse { Id = receiver.Id, Username = receiver.Username },
+                });
+            }
+            catch (InvalidOperationException)
+            {
+                return Conflict();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, $"Could not send friend request to user with id ({id}).");
+                return BadRequest();
+            }
+        }
+
+        [Authorize(AuthenticationSchemes = JwtSchemes.User)]
+        [HttpPost("{id}/friend-requests/{friendRequestId}")]
+        public async Task<IActionResult> AnswerFriendRequestAsync(
+            int id,
+            int friendRequestId,
+            [FromBody] FriendRequestAnswerRequest request)
+        {
+            try
+            {
+                var subClaim = User.FindFirst(JwtRegisteredClaimNames.Sub);
+                if (subClaim is null ||
+                    !int.TryParse(subClaim.Value, out int idFromToken) ||
+                    idFromToken != id)
+                {
+                    return Unauthorized();
+                }
+
+                var friendRequest = await _userManager.GetFriendRequestAsync(friendRequestId);
+                if (friendRequest is null)
+                {
+                    return NotFound();
+                }
+                else if (friendRequest.User2Id != id)
+                {
+                    // User1 sends the friend request, User2 answers to it
+                    return Unauthorized();
+                }
+
+                if (request.Accept)
+                {
+                    await _userManager.AcceptFriendRequestAsync(friendRequestId);
+                }
+                else
+                {
+                    await _userManager.RejectFriendRequestAsync(friendRequestId);
+                }
+
+                _notificationsService.SendNotification(new FriendRequestNotification(
+                    friendRequestId: friendRequest.Id,
+                    accepted: request.Accept,
+                    sender: await _userManager.GetUserAsync(friendRequest.User1Id),
+                    receiver: await _userManager.GetUserAsync(friendRequest.User2Id)));
+
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, $"Could not answer friend request with id ({friendRequestId})");
                 return BadRequest();
             }
         }

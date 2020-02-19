@@ -109,8 +109,10 @@ export default class SessionManager {
     private startSessionInternal(auth: AuthDetails): void {
         this._session = new Session(auth, new WebSocketSession(this._webSocketAddress, auth));
         this._wsProcessor = new WSProcessor({
+            auth: this._session.auth,
             webSocketSession: this._session.webSocketSession,
             messages: this._session.messages,
+            friends: this._session.friends,
         });
         this.persistAuth(auth);
         this.startPeriodicTokenRenewal();
@@ -124,7 +126,7 @@ export default class SessionManager {
 
             const { authToken: { token }, user } = this._session.auth;
             try {
-                const { data } = await this._api.post(' auth/renew-token', { username: user.username }, token);
+                const { data } = await this._api.post('auth/renew-token', { username: user.username }, token);
                 const auth = new AuthDetails(user, {
                     createdAt: new Date(data.createdAt),
                     token: data.accessToken,

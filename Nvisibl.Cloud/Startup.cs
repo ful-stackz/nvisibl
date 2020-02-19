@@ -19,6 +19,9 @@ using Nvisibl.Business.Interfaces;
 using Nvisibl.Business;
 using Microsoft.AspNetCore.Identity;
 using Nvisibl.Cloud.Authentication;
+using System.IdentityModel.Tokens.Jwt;
+using Nvisibl.Cloud.Services.Interfaces;
+using Nvisibl.Cloud.Services;
 
 namespace Nvisibl.Cloud
 {
@@ -53,6 +56,8 @@ namespace Nvisibl.Cloud
                 .AddEntityFrameworkStores<AuthContext>()
                 .AddDefaultTokenProviders();
 
+            JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
+
             var jwtConfiguration = new JwtConfiguration(Configuration);
             services.AddSingleton(jwtConfiguration);
 
@@ -69,6 +74,7 @@ namespace Nvisibl.Cloud
             services.AddTransient<IChatroomsManager, ChatroomsManager>();
             services.AddTransient<IMessagesManager, MessagesManager>();
 
+            services.AddSingleton<INotificationsService, NotificationsService>();
             services.AddSingleton<IMessengerService, MessengerService>();
             services.AddSingleton<IMessageParser, MessageParser>();
             services.AddSingleton<ClientsManager>();

@@ -1,5 +1,6 @@
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import User from '../models/user';
+import FriendRequest from '../models/friendRequest';
 
 export default class FriendsStore {
     private _friends: User[];
@@ -7,9 +8,11 @@ export default class FriendsStore {
     constructor() {
         this._friends = [];
         this.onChange = new BehaviorSubject<User[]>([]);
+        this.onFriendRequest = new Subject<FriendRequest>();
     }
 
-    public onChange: BehaviorSubject<User[]>;
+    public readonly onChange: BehaviorSubject<User[]>;
+    public readonly onFriendRequest: Subject<FriendRequest>;
 
     public add(friend: User): void {
         if (!friend) return;

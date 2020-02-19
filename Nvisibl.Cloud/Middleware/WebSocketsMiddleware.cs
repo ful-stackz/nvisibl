@@ -9,6 +9,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Nvisibl.Business.Interfaces;
 using Nvisibl.Cloud.Authentication;
+using Nvisibl.Cloud.Services.Interfaces;
 using Nvisibl.Cloud.WebSockets;
 using Nvisibl.Cloud.WebSockets.Interfaces;
 using Nvisibl.Cloud.WebSockets.Messages.Client;
@@ -53,6 +54,7 @@ namespace Nvisibl.Cloud.Middleware
         public async Task Invoke(
             HttpContext httpContext,
             IChatroomsManager chatroomsManager,
+            INotificationsService notificationsService,
             ILogger<WebSocketSession> logger)
         {
             if (httpContext is null)
@@ -63,6 +65,11 @@ namespace Nvisibl.Cloud.Middleware
             if (chatroomsManager is null)
             {
                 throw new ArgumentNullException(nameof(chatroomsManager));
+            }
+
+            if (notificationsService is null)
+            {
+                throw new ArgumentNullException(nameof(notificationsService));
             }
 
             if (!httpContext.WebSockets.IsWebSocketRequest || httpContext.Request.Path != ChatClientEndpoint)
@@ -110,6 +117,10 @@ namespace Nvisibl.Cloud.Middleware
                 webSocketSession,
                 chatroomsManager,
                 _messengerService);
+            using var notificationClient = new NotificationClient(
+                connectionRequest.UserId,
+                webSocketSession,
+                notificationsService);
 
             webSocketSession.EnqueueMessage(new ConnectedMessage { SessionId = sessionId, });
 
