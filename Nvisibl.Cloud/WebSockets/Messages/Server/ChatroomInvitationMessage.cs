@@ -1,4 +1,6 @@
 ﻿using Nvisibl.Cloud.WebSockets.Messages.Server.Base;
+using System;
+using System.Collections.Generic;
 
 namespace Nvisibl.Cloud.WebSockets.Messages.Server
 {
@@ -7,7 +9,6 @@ namespace Nvisibl.Cloud.WebSockets.Messages.Server
     {
         public int ChatroomId { get; set; }
         public string ChatroomName { get; set; } = string.Empty;
-        public int SenderId { get; set; }
-        public string SenderName { get; set; } = string.Empty;
+        public IList<int> Users { get; set; } = Array.Empty<int>();
     }
 }

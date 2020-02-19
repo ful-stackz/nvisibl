@@ -76,6 +76,6 @@
     {:else if inError}
         <div class="text-red-800">Could not load chatrooms</div>
     {:else}
-        <div>No chatrooms</div>
+        <div class="text-xs">No chatrooms</div>
     {/if}
 </div>

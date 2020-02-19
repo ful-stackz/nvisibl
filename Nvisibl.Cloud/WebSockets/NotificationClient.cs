@@ -2,13 +2,14 @@
 using Nvisibl.Cloud.Services.Interfaces;
 using Nvisibl.Cloud.WebSockets.Messages.Server;
 using System;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 
 namespace Nvisibl.Cloud.WebSockets
 {
     public class NotificationClient : IDisposable
     {
-        private readonly IDisposable _notificationsSubscription;
+        private readonly CompositeDisposable _subscriptions = new CompositeDisposable();
 
         private bool _isDisposed;
 
@@ -27,7 +28,8 @@ namespace Nvisibl.Cloud.WebSockets
                 throw new ArgumentNullException(nameof(notificationsService));
             }
 
-            _notificationsSubscription = notificationsService.Notifications
+            _subscriptions.Add(
+                notificationsService.Notifications
                 .Where(notification => notification is FriendRequestNotification)
                 .OfType<FriendRequestNotification>()
                 .Where(notification => notification.Sender.Id == userId || notification.Receiver.Id == userId)
@@ -40,7 +42,7 @@ namespace Nvisibl.Cloud.WebSockets
                         ReceiverUsername = notification.Receiver.Username,
                         SenderId = notification.Sender.Id,
                         SenderUsername = notification.Sender.Username,
-                    }));
+                    })));
         }
 
         public void Dispose()
@@ -55,7 +57,7 @@ namespace Nvisibl.Cloud.WebSockets
             {
                 if (disposing)
                 {
-                    _notificationsSubscription.Dispose();
+                    _subscriptions.Dispose();
                 }
                 _isDisposed = true;
             }

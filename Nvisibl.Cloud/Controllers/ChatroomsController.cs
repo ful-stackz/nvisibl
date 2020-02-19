@@ -9,6 +9,8 @@ using System.Threading.Tasks;
 using System.Linq;
 using Microsoft.AspNetCore.Authorization;
 using Nvisibl.Cloud.Authentication;
+using Nvisibl.Cloud.Services.Interfaces;
+using Nvisibl.Cloud.Models.Data;
 
 namespace Nvisibl.Cloud.Controllers
 {
@@ -17,11 +19,16 @@ namespace Nvisibl.Cloud.Controllers
     public class ChatroomsController : ControllerBase
     {
         private readonly IChatroomsManager _chatroomManagerService;
+        private readonly INotificationsService _notificationsService;
         private readonly ILogger<ChatroomsController> _logger;
 
-        public ChatroomsController(IChatroomsManager chatroomManagerService, ILogger<ChatroomsController> logger)
+        public ChatroomsController(
+            IChatroomsManager chatroomManagerService,
+            INotificationsService notificationsService,
+            ILogger<ChatroomsController> logger)
         {
             _chatroomManagerService = chatroomManagerService ?? throw new ArgumentNullException(nameof(chatroomManagerService));
+            _notificationsService = notificationsService ?? throw new ArgumentNullException(nameof(notificationsService));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
@@ -95,14 +102,22 @@ namespace Nvisibl.Cloud.Controllers
                     OwnerId = request.OwnerId,
                     IsShared = request.IsShared,
                 });
-                return chatroom is { }
-                    ? new JsonResult(new BasicChatroomResponse
-                    {
-                        Id = chatroom.Id,
-                        Name = chatroom.Name,
-                        IsShared = chatroom.IsShared,
-                    })
-                    : (ActionResult)BadRequest();
+                if (chatroom is null)
+                {
+                    return BadRequest();
+                }
+
+                _notificationsService.SendNotification(new ChatroomChangedNotification(
+                    chatroomId: chatroom.Id,
+                    chatroomName: chatroom.Name,
+                    participants: new int[] { request.OwnerId, }));
+
+                return new JsonResult(new BasicChatroomResponse
+                {
+                    Id = chatroom.Id,
+                    Name = chatroom.Name,
+                    IsShared = chatroom.IsShared,
+                });
             }
             catch (Exception ex)
             {
@@ -180,6 +195,12 @@ namespace Nvisibl.Cloud.Controllers
                     ChatroomId = id,
                     UserId = request.UserId,
                 });
+
+                _notificationsService.SendNotification(new ChatroomChangedNotification(
+                    chatroomId: chatroom.Id,
+                    chatroomName: chatroom.Name,
+                    participants: users.Select(user => user.Id).Append(request.UserId)));
+
                 return Ok();
             }
             catch (Exception ex)

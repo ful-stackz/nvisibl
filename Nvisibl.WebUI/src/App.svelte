@@ -29,11 +29,11 @@
 
 <div class="container mx-auto h-screen">
     {#if !isLoggedIn}
-        <div class="flex justify-center">
+        <div class="flex flex-col lg:flex-row justify-center">
             <div class="m-2 self-center">
                 <Login {api} {sessionManager} />
             </div>
-            <div class="m-2 self-center italic">- Or -</div>
+            <div class="m-0 lg:m-2 self-center italic">or</div>
             <div class="m-2 self-center">
                 <Register {api} />
             </div>

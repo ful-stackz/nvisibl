@@ -1,6 +1,9 @@
 ﻿using Nvisibl.Business.Interfaces;
 using Nvisibl.Business.Models.Messages;
+using Nvisibl.Cloud.Models.Data;
+using Nvisibl.Cloud.Services.Interfaces;
 using Nvisibl.Cloud.WebSockets.Interfaces;
+using Nvisibl.Cloud.WebSockets.Messages.Server;
 using System;
 using System.Linq;
 using System.Reactive.Disposables;
@@ -20,7 +23,8 @@ namespace Nvisibl.Cloud.WebSockets
             Guid sessionId,
             WebSocketSession webSocketSession,
             IChatroomsManager chatroomsManager,
-            IMessengerService messengerService)
+            IMessengerService messengerService,
+            INotificationsService notificationsService)
         {
             if (chatroomsManager is null)
             {
@@ -30,6 +34,11 @@ namespace Nvisibl.Cloud.WebSockets
             if (messengerService is null)
             {
                 throw new ArgumentNullException(nameof(messengerService));
+            }
+
+            if (notificationsService is null)
+            {
+                throw new ArgumentNullException(nameof(notificationsService));
             }
 
             UserId = userId;
@@ -65,6 +74,25 @@ namespace Nvisibl.Cloud.WebSockets
                     MessageId = msg.Id,
                     TimeSentUtc = msg.TimeSentUtc.ToString("o"),
                 })));
+
+            _subscriptions.Add(
+                notificationsService.Notifications
+                .Where(notif => notif is ChatroomChangedNotification)
+                .OfType<ChatroomChangedNotification>()
+                .Where(notif => notif.Participants.Contains(userId))
+                .Subscribe(notif =>
+                {
+                    if (!chatrooms.Contains(notif.ChatroomId))
+                    {
+                        chatrooms.Add(notif.ChatroomId);
+                        webSocketSession.EnqueueMessage(new ChatroomInvitationMessage
+                        {
+                            ChatroomId = notif.ChatroomId,
+                            ChatroomName = notif.ChatroomName,
+                            Users = notif.Participants,
+                        });
+                    }
+                }));
         }
 
         public int UserId { get; }

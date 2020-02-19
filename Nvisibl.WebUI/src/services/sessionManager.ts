@@ -109,10 +109,8 @@ export default class SessionManager {
     private startSessionInternal(auth: AuthDetails): void {
         this._session = new Session(auth, new WebSocketSession(this._webSocketAddress, auth));
         this._wsProcessor = new WSProcessor({
-            auth: this._session.auth,
-            webSocketSession: this._session.webSocketSession,
-            messages: this._session.messages,
-            friends: this._session.friends,
+            api: this._api,
+            session: this._session,
         });
         this.persistAuth(auth);
         this.startPeriodicTokenRenewal();

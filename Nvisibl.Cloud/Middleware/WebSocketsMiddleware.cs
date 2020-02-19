@@ -116,7 +116,8 @@ namespace Nvisibl.Cloud.Middleware
                 sessionId,
                 webSocketSession,
                 chatroomsManager,
-                _messengerService);
+                _messengerService,
+                notificationsService);
             using var notificationClient = new NotificationClient(
                 connectionRequest.UserId,
                 webSocketSession,

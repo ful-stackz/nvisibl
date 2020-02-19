@@ -54,6 +54,13 @@ const deserializeServerMessage = (message: string): ServerMessage => {
             });
         }
 
+        case ServerMessageTypes.ChatroomInvitation:
+            return new serverMessages.ChatroomInvitation({
+                chatroomId: json.payload.chatroomId,
+                chatroomName: json.payload.chatroomName,
+                users: json.payload.users,
+            });
+
         default:
             return new serverMessages.Empty();
     }
