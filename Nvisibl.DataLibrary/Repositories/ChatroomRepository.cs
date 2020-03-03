@@ -27,7 +27,7 @@ namespace Nvisibl.DataLibrary.Repositories
             return await Context.Set<ChatroomUser>()
                 .Where(cu => cu.UserId == user.Id)
                 .Include(cu => cu.Chatroom)
-                .Select(cu => cu.Chatroom)
+                .Select(cu => cu.Chatroom!)
                 .ToListAsync();
         }
 
@@ -41,7 +41,7 @@ namespace Nvisibl.DataLibrary.Repositories
             return await Context.Set<ChatroomUser>()
                 .Where(cu => cu.ChatroomId == id)
                 .Include(c => c.User)
-                .Select(c => c.User)
+                .Select(c => c.User!)
                 .ToListAsync();
         }
     }
