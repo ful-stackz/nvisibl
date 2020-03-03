@@ -27,9 +27,12 @@ namespace Nvisibl.Cloud
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        private readonly IWebHostEnvironment _hostEnv;
+
+        public Startup(IConfiguration configuration, IWebHostEnvironment hostEnv)
         {
             Configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+            _hostEnv = hostEnv ?? throw new ArgumentNullException(nameof(hostEnv));
         }
 
         public IConfiguration Configuration { get; }
@@ -40,13 +43,17 @@ namespace Nvisibl.Cloud
 
             services.AddCors();
 
-            services.AddDbContext<AuthContext>(
-                options => options.UseMySql(
-                    ConnectionStringHelper.GetConnectionString(Configuration)));
-
-            services.AddDbContext<ChatContext>(
-                options => options.UseMySql(
-                    ConnectionStringHelper.GetConnectionString(Configuration)));
+            if (_hostEnv.IsProduction())
+            {
+                var connectionString = ConnectionStringHelper.GetConnectionString(Configuration);
+                services.AddDbContext<AuthContext>(options => options.UseMySql(connectionString));
+                services.AddDbContext<ChatContext>(options => options.UseMySql(connectionString));
+            }
+            else
+            {
+                services.AddDbContext<AuthContext>(options => options.UseInMemoryDatabase(nameof(AuthContext)));
+                services.AddDbContext<ChatContext>(options => options.UseInMemoryDatabase(nameof(ChatContext)));
+            }
 
             services.AddIdentity<IdentityUser, IdentityRole>(
                 config =>
