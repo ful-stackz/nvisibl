@@ -7,6 +7,6 @@ namespace Nvisibl.Cloud.Services.Interfaces
     {
         IObservable<Notification> Notifications { get; }
 
-        void SendNotification(Notification notification);
+        void EnqueueNotification(Notification notification);
     }
 }

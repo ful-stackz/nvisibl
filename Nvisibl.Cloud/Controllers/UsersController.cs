@@ -281,7 +281,7 @@ namespace Nvisibl.Cloud.Controllers
                 var sender = await _userManager.GetUserAsync(request.SenderId);
                 var receiver = await _userManager.GetUserAsync(id);
 
-                _notificationsService.SendNotification(new FriendRequestNotification(
+                _notificationsService.EnqueueNotification(new FriendRequestNotification(
                     friendRequestId: friendRequest.Id,
                     accepted: friendRequest.Accepted,
                     sender: sender,
@@ -342,7 +342,7 @@ namespace Nvisibl.Cloud.Controllers
                     await _userManager.RejectFriendRequestAsync(friendRequestId);
                 }
 
-                _notificationsService.SendNotification(new FriendRequestNotification(
+                _notificationsService.EnqueueNotification(new FriendRequestNotification(
                     friendRequestId: friendRequest.Id,
                     accepted: request.Accept,
                     sender: await _userManager.GetUserAsync(friendRequest.User1Id),

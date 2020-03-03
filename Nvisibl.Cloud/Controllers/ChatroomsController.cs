@@ -107,7 +107,7 @@ namespace Nvisibl.Cloud.Controllers
                     return BadRequest();
                 }
 
-                _notificationsService.SendNotification(new ChatroomChangedNotification(
+                _notificationsService.EnqueueNotification(new ChatroomChangedNotification(
                     chatroomId: chatroom.Id,
                     chatroomName: chatroom.Name,
                     participants: new int[] { request.OwnerId, }));
@@ -196,7 +196,7 @@ namespace Nvisibl.Cloud.Controllers
                     UserId = request.UserId,
                 });
 
-                _notificationsService.SendNotification(new ChatroomChangedNotification(
+                _notificationsService.EnqueueNotification(new ChatroomChangedNotification(
                     chatroomId: chatroom.Id,
                     chatroomName: chatroom.Name,
                     participants: users.Select(user => user.Id).Append(request.UserId)));

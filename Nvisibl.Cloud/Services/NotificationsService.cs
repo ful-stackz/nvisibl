@@ -30,7 +30,7 @@ namespace Nvisibl.Cloud.Services
         public IObservable<Notification> Notifications =>
             _notificiationsSubject.ObserveOn(_notificationScheduler).AsObservable();
 
-        public void SendNotification(Notification notification)
+        public void EnqueueNotification(Notification notification)
         {
             if (notification is null)
             {
