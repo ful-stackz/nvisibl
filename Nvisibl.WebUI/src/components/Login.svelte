@@ -38,7 +38,10 @@
                 username = '';
                 password = '';
             })
-            .catch((_) => inError = true);
+            .catch((error) => {
+                console.error(error);
+                inError = true;
+            });
     }
 
     function loginOnEnter(e: KeyboardEvent): void {
