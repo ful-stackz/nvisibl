@@ -19,9 +19,9 @@ interface PersistanceAuth {
     },
 }
 
-const encode = (value: any): string => btoa(typeof value === 'string' ? value : JSON.stringify(value));
+const encode = (value: any): string => btoa(escape(typeof value === 'string' ? value : JSON.stringify(value)));
 
-const decode = (value: string): any => (value ? JSON.parse(atob(value)) : null);
+const decode = (value: string): any => (value ? JSON.parse(unescape(atob(value))) : null);
 
 export default class SessionManager {
     private readonly LockPrefix = 'nvisibl_';
