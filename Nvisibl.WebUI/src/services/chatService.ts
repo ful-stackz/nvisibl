@@ -1,8 +1,6 @@
 import { BehaviorSubject } from 'rxjs';
 import Chatroom from '../models/chatroom';
-import SendChatMessage from '../server/messages/client/sendChatMessage';
 import Session from './session';
-import Message from '../models/message';
 
 export default class ChatService {
     private readonly _session: Session;
@@ -23,23 +21,27 @@ export default class ChatService {
         this.onActiveChatroomChange.next(next);
     }
 
-    public sendMessage(body: string) : void {
-        if (!body) return;
-        const { auth, messages } = this._session;
-        const chatroom = this.getActiveChatroom();
-        const timeSent = new Date();
-        this._session.webSocketSession.sendMessage(new SendChatMessage(
-            auth.user.id,
-            chatroom.id,
-            body,
-            timeSent.toUTCString(),
-        ));
-        messages.add(new Message(
-            -1,
-            auth.user.id,
-            chatroom.id,
-            body,
-            timeSent,
-        ));
+    public sendMessage(body: string) : Promise<any> {
+        return new Promise((resolve, reject) => {
+            if (!body) {
+                reject(new Error('Invalid body.'));
+                return;
+            }
+            const { api, auth } = this._session;
+            const chatroom = this.getActiveChatroom();
+            const timeSent = new Date();
+            api.post(
+                'messages',
+                {
+                    authorId: auth.user.id,
+                    chatroomId: chatroom.id,
+                    body,
+                    timeSentUtc: timeSent.toISOString(),
+                },
+                auth.authToken.token,
+            )
+                .then(resolve)
+                .catch(reject);
+        });
     }
 }

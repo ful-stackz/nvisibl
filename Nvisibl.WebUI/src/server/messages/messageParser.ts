@@ -1,12 +1,10 @@
 import ClientMessage from './client/clientMessage';
 import ConnectionRequest from './client/connectionRequest';
-import SendChatMessage from './client/sendChatMessage';
 import ServerMessage from './server/serverMessage';
 import serverMessages from './server';
 
 const ClientMessageTypes = {
     ConnectionRequest: 'CONNECTION_REQUEST',
-    SendMessage: 'CHAT_MESSAGE_SEND',
 };
 Object.freeze(ClientMessageTypes);
 
@@ -74,8 +72,6 @@ const serializeClientMessage = (message: ClientMessage): string => {
 
     if (message instanceof ConnectionRequest) {
         type = ClientMessageTypes.ConnectionRequest;
-    } else if (message instanceof SendChatMessage) {
-        type = ClientMessageTypes.SendMessage;
     } else {
         type = '';
         payload = null;

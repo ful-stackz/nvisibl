@@ -107,7 +107,11 @@ export default class SessionManager {
     }
 
     private startSessionInternal(auth: AuthDetails): void {
-        this._session = new Session(auth, new WebSocketSession(this._webSocketAddress, auth));
+        this._session = new Session(
+            this._api,
+            auth,
+            new WebSocketSession(this._webSocketAddress, auth),
+        );
         this._wsProcessor = new WSProcessor({
             api: this._api,
             session: this._session,
