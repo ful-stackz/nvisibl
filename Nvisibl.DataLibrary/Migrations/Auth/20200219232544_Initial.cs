@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Nvisibl.DataLibrary.Migrations.Auth
 {
-    public partial class AddAuthContext : Migration
+    public partial class Initial : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -12,9 +12,9 @@ namespace Nvisibl.DataLibrary.Migrations.Auth
                 name: "AspNetRoles",
                 columns: table => new
                 {
-                    Id = table.Column<string>(nullable: false),
-                    Name = table.Column<string>(maxLength: 256, nullable: true),
-                    NormalizedName = table.Column<string>(maxLength: 256, nullable: true),
+                    Id = table.Column<string>(maxLength: 80, nullable: false),
+                    Name = table.Column<string>(maxLength: 250, nullable: true),
+                    NormalizedName = table.Column<string>(maxLength: 250, nullable: true),
                     ConcurrencyStamp = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
@@ -26,11 +26,11 @@ namespace Nvisibl.DataLibrary.Migrations.Auth
                 name: "AspNetUsers",
                 columns: table => new
                 {
-                    Id = table.Column<string>(nullable: false),
-                    UserName = table.Column<string>(maxLength: 256, nullable: true),
-                    NormalizedUserName = table.Column<string>(maxLength: 256, nullable: true),
-                    Email = table.Column<string>(maxLength: 256, nullable: true),
-                    NormalizedEmail = table.Column<string>(maxLength: 256, nullable: true),
+                    Id = table.Column<string>(maxLength: 80, nullable: false),
+                    UserName = table.Column<string>(maxLength: 250, nullable: true),
+                    NormalizedUserName = table.Column<string>(maxLength: 250, nullable: true),
+                    Email = table.Column<string>(maxLength: 250, nullable: true),
+                    NormalizedEmail = table.Column<string>(maxLength: 250, nullable: true),
                     EmailConfirmed = table.Column<bool>(nullable: false),
                     PasswordHash = table.Column<string>(nullable: true),
                     SecurityStamp = table.Column<string>(nullable: true),
@@ -93,8 +93,8 @@ namespace Nvisibl.DataLibrary.Migrations.Auth
                 name: "AspNetUserLogins",
                 columns: table => new
                 {
-                    LoginProvider = table.Column<string>(nullable: false),
-                    ProviderKey = table.Column<string>(nullable: false),
+                    LoginProvider = table.Column<string>(maxLength: 80, nullable: false),
+                    ProviderKey = table.Column<string>(maxLength: 80, nullable: false),
                     ProviderDisplayName = table.Column<string>(nullable: true),
                     UserId = table.Column<string>(nullable: false)
                 },
@@ -113,8 +113,8 @@ namespace Nvisibl.DataLibrary.Migrations.Auth
                 name: "AspNetUserRoles",
                 columns: table => new
                 {
-                    UserId = table.Column<string>(nullable: false),
-                    RoleId = table.Column<string>(nullable: false)
+                    UserId = table.Column<string>(maxLength: 80, nullable: false),
+                    RoleId = table.Column<string>(maxLength: 80, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -137,9 +137,9 @@ namespace Nvisibl.DataLibrary.Migrations.Auth
                 name: "AspNetUserTokens",
                 columns: table => new
                 {
-                    UserId = table.Column<string>(nullable: false),
-                    LoginProvider = table.Column<string>(nullable: false),
-                    Name = table.Column<string>(nullable: false),
+                    UserId = table.Column<string>(maxLength: 80, nullable: false),
+                    LoginProvider = table.Column<string>(maxLength: 80, nullable: false),
+                    Name = table.Column<string>(maxLength: 80, nullable: false),
                     Value = table.Column<string>(nullable: true)
                 },
                 constraints: table =>

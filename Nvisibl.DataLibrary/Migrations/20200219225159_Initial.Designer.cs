@@ -9,7 +9,7 @@ using Nvisibl.DataLibrary.Contexts;
 namespace Nvisibl.DataLibrary.Migrations
 {
     [DbContext(typeof(ChatContext))]
-    [Migration("20200212175114_Initial")]
+    [Migration("20200219225159_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
