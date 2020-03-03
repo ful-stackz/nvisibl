@@ -11,8 +11,6 @@ using Microsoft.Extensions.Logging;
 using Nvisibl.DataLibrary.Repositories;
 using Nvisibl.DataLibrary.Repositories.Interfaces;
 using Nvisibl.Cloud.Middleware;
-using Nvisibl.Cloud.WebSockets.Interfaces;
-using Nvisibl.Cloud.WebSockets;
 using Nvisibl.Cloud.WebSockets.Messages.Interfaces;
 using Nvisibl.Cloud.WebSockets.Messages;
 using Nvisibl.Business.Interfaces;
@@ -75,11 +73,7 @@ namespace Nvisibl.Cloud
             services.AddTransient<IMessagesManager, MessagesManager>();
 
             services.AddSingleton<INotificationsService, NotificationsService>();
-            services.AddSingleton<IMessengerService, MessengerService>();
             services.AddSingleton<IMessageParser, MessageParser>();
-            services.AddSingleton<ClientsManager>();
-            services.AddSingleton<IChatClientsManager>(sp => sp.GetService<ClientsManager>());
-            services.AddSingleton<INotificationClientManager>(sp => sp.GetService<ClientsManager>());
 
             services.AddControllers();
         }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
@@ -7,11 +8,11 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Primitives;
 using Nvisibl.Business.Interfaces;
 using Nvisibl.Cloud.Authentication;
 using Nvisibl.Cloud.Services.Interfaces;
 using Nvisibl.Cloud.WebSockets;
-using Nvisibl.Cloud.WebSockets.Interfaces;
 using Nvisibl.Cloud.WebSockets.Messages.Client;
 using Nvisibl.Cloud.WebSockets.Messages.Client.Base;
 using Nvisibl.Cloud.WebSockets.Messages.Interfaces;
@@ -24,20 +25,19 @@ namespace Nvisibl.Cloud.Middleware
         private static readonly TimeSpan DefaultConnectionTimeout = TimeSpan.FromSeconds(5);
         private static readonly TimeSpan DevConnectionTimeout = TimeSpan.FromSeconds(15);
 
-        private const string ChatClientEndpoint = "/ws/chat";
+        private const string ChatClientEndpoint = "/ws";
+        private const string AuthorizationHeaderKey = "Authorization";
 
         private readonly RequestDelegate _next;
-        private readonly IChatClientsManager _chatClientsManager;
+        private readonly INotificationsService _notificationsService;
         private readonly IMessageParser _messageParser;
-        private readonly IMessengerService _messengerService;
         private readonly TimeSpan _connectionTimeout;
 
         public WebSocketsMiddleware(
             RequestDelegate next,
             IWebHostEnvironment hostEnvironment,
-            IChatClientsManager chatClientsManager,
-            IMessageParser messageParser,
-            IMessengerService messengerService)
+            INotificationsService notificationsService,
+            IMessageParser messageParser)
         {
             if (hostEnvironment is null)
             {
@@ -45,16 +45,14 @@ namespace Nvisibl.Cloud.Middleware
             }
 
             _next = next ?? throw new ArgumentNullException(nameof(next));
-            _chatClientsManager = chatClientsManager ?? throw new ArgumentNullException(nameof(chatClientsManager));
+            _notificationsService = notificationsService ?? throw new ArgumentNullException(nameof(notificationsService));
             _messageParser = messageParser ?? throw new ArgumentNullException(nameof(messageParser));
-            _messengerService = messengerService ?? throw new ArgumentNullException(nameof(messengerService));
             _connectionTimeout = hostEnvironment.IsDevelopment() ? DevConnectionTimeout : DefaultConnectionTimeout;
         }
 
         public async Task Invoke(
             HttpContext httpContext,
             IChatroomsManager chatroomsManager,
-            INotificationsService notificationsService,
             ILogger<WebSocketSession> logger)
         {
             if (httpContext is null)
@@ -65,11 +63,6 @@ namespace Nvisibl.Cloud.Middleware
             if (chatroomsManager is null)
             {
                 throw new ArgumentNullException(nameof(chatroomsManager));
-            }
-
-            if (notificationsService is null)
-            {
-                throw new ArgumentNullException(nameof(notificationsService));
             }
 
             if (!httpContext.WebSockets.IsWebSocketRequest || httpContext.Request.Path != ChatClientEndpoint)
@@ -100,7 +93,7 @@ namespace Nvisibl.Cloud.Middleware
                 return;
             }
 
-            httpContext.Request.Headers.Add("Authorization", $"Bearer {connectionRequest.AccessToken}");
+            httpContext.Request.Headers.Add(GetAuthorizationHeader(connectionRequest));
             var authResults = await Task.WhenAll(
                 httpContext.AuthenticateAsync(JwtSchemes.Admin),
                 httpContext.AuthenticateAsync(JwtSchemes.User));
@@ -111,25 +104,19 @@ namespace Nvisibl.Cloud.Middleware
             }
 
             var sessionId = Guid.NewGuid();
-            using var chatClient = new ChatClient(
+            using var chatClient = new NotificationClient(
                 connectionRequest.UserId,
                 sessionId,
                 webSocketSession,
                 chatroomsManager,
-                _messengerService,
-                notificationsService);
-            using var notificationClient = new NotificationClient(
-                connectionRequest.UserId,
-                webSocketSession,
-                notificationsService);
+                _notificationsService);
 
             webSocketSession.EnqueueMessage(new ConnectedMessage { SessionId = sessionId, });
 
-            _chatClientsManager.AddClient(chatClient);
-
             await webSocketSession.Lifetime.Task;
-
-            _chatClientsManager.RemoveClient(client => client.UserId == chatClient.UserId);
         }
+
+        private KeyValuePair<string, StringValues> GetAuthorizationHeader(ConnectionRequestMessage request) =>
+            new KeyValuePair<string, StringValues>(AuthorizationHeaderKey, $"Bearer {request.AccessToken}");
     }
 }

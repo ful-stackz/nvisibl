@@ -1,10 +1,10 @@
-﻿using Nvisibl.Cloud.WebSockets.Messages.Server;
+﻿using System;
 
 namespace Nvisibl.Cloud.WebSockets.Interfaces
 {
-    public interface INotificationClient : IClient
+    public interface INotificationClient
     {
-        void SendFriendRequest(FriendRequestMessage friendRequest);
-        void SendChatroomInvite(ChatroomInvitationMessage chatroomInvitation);
+        public int UserId { get; }
+        public Guid SessionId { get; }
     }
 }
