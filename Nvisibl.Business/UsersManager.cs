@@ -21,6 +21,10 @@ namespace Nvisibl.Business
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         }
 
+        /// <inheritdoc/>
+        /// <exception cref="ObjectDisposedException">
+        /// When the object is disposed.
+        /// </exception>
         public async Task<UserModel> CreateUserAsync(CreateUserModel createUserModel)
         {
             if (_isDisposed)
@@ -40,6 +44,10 @@ namespace Nvisibl.Business
             return Mappers.ToUserModel(user);
         }
 
+        /// <inheritdoc/>
+        /// <exception cref="ObjectDisposedException">
+        /// When the object is disposed.
+        /// </exception>
         public async Task<FriendModel> CreateFriendRequestAsync(AddUserFriendModel addUserFriendModel)
         {
             if (_isDisposed)
@@ -80,6 +88,10 @@ namespace Nvisibl.Business
             };
         }
 
+        /// <inheritdoc/>
+        /// <exception cref="ObjectDisposedException">
+        /// When the object is disposed.
+        /// </exception>
         public async Task<UserModel> GetUserAsync(int id)
         {
             if (_isDisposed)
@@ -95,6 +107,10 @@ namespace Nvisibl.Business
             return Mappers.ToUserModel(await _unitOfWork.GetRepository<IUserRepository>().GetAsync(id));
         }
 
+        /// <inheritdoc/>
+        /// <exception cref="ObjectDisposedException">
+        /// When the object is disposed.
+        /// </exception>
         public async Task<UserModel?> GetUserAsync(string username)
         {
             if (string.IsNullOrEmpty(username))
@@ -111,6 +127,10 @@ namespace Nvisibl.Business
             });
         }
 
+        /// <inheritdoc/>
+        /// <exception cref="ObjectDisposedException">
+        /// When the object is disposed.
+        /// </exception>
         public async Task<FriendModel> GetFriendRequestAsync(int id)
         {
             if (_isDisposed)
@@ -133,6 +153,10 @@ namespace Nvisibl.Business
             };
         }
 
+        /// <inheritdoc/>
+        /// <exception cref="ObjectDisposedException">
+        /// When the object is disposed.
+        /// </exception>
         public async Task<IEnumerable<UserModel>> GetUsersAsync(int page = 0, int pageSize = 10)
         {
             if (_isDisposed)
@@ -155,6 +179,10 @@ namespace Nvisibl.Business
                 .ToList();
         }
 
+        /// <inheritdoc/>
+        /// <exception cref="ObjectDisposedException">
+        /// When the object is disposed.
+        /// </exception>
         public async Task<IEnumerable<UserModel>> GetUserFriendsAsync(int id)
         {
             if (_isDisposed)
@@ -174,6 +202,10 @@ namespace Nvisibl.Business
                 .ToList();
         }
 
+        /// <inheritdoc/>
+        /// <exception cref="ObjectDisposedException">
+        /// When the object is disposed.
+        /// </exception>
         public async Task<IEnumerable<FriendModel>> GetUserFriendRequestsAsync(int id)
         {
             if (_isDisposed)
@@ -199,6 +231,10 @@ namespace Nvisibl.Business
                 .ToList());
         }
 
+        /// <inheritdoc/>
+        /// <exception cref="ObjectDisposedException">
+        /// When the object is disposed.
+        /// </exception>
         public async Task<FriendModel> AddUserFriendAsync(AddUserFriendModel addUserFriendModel)
         {
             if (_isDisposed)
@@ -232,6 +268,10 @@ namespace Nvisibl.Business
             };
         }
 
+        /// <inheritdoc/>
+        /// <exception cref="ObjectDisposedException">
+        /// When the object is disposed.
+        /// </exception>
         public async Task AcceptFriendRequestAsync(int id)
         {
             if (_isDisposed)
@@ -256,6 +296,10 @@ namespace Nvisibl.Business
             _ = await _unitOfWork.CompleteAsync();
         }
 
+        /// <inheritdoc/>
+        /// <exception cref="ObjectDisposedException">
+        /// When the object is disposed.
+        /// </exception>
         public async Task RejectFriendRequestAsync(int id)
         {
             if (_isDisposed)

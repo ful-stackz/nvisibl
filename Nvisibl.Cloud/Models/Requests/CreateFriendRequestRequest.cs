@@ -6,5 +6,8 @@ namespace Nvisibl.Cloud.Models.Requests
     {
         [Required]
         public int SenderId { get; set; }
+
+        [Required]
+        public int ReceiverId { get; set; }
     }
 }

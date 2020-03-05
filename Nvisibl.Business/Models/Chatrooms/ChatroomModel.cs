@@ -1,4 +1,7 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Nvisibl.Business.Models.Users;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace Nvisibl.Business.Models.Chatrooms
 {
@@ -12,5 +15,8 @@ namespace Nvisibl.Business.Models.Chatrooms
 
         [Required]
         public bool IsShared { get; set; }
+
+        [Required]
+        public IList<UserModel> Users { get; set; } = Array.Empty<UserModel>();
     }
 }

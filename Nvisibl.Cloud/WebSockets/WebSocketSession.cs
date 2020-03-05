@@ -45,8 +45,8 @@ namespace Nvisibl.Cloud.WebSockets
             {
                 try
                 {
+                    var buffer = new byte[WebSocketConfig.ReceiveBufferSize];
                     var received = new List<byte[]>(4);
-                    byte[] buffer = new byte[1024 * 4];
                     while (!_isDisposed && !webSocket.CloseStatus.HasValue && webSocket.State == WebSocketState.Open)
                     {
                         var result = webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None)
@@ -89,8 +89,8 @@ namespace Nvisibl.Cloud.WebSockets
 
                     try
                     {
-                        webSocket.SendAsync(new ArraySegment<byte>(
-                            Encoding.UTF8.GetBytes(messageRaw)),
+                        webSocket.SendAsync(
+                            new ArraySegment<byte>(Encoding.UTF8.GetBytes(messageRaw)),
                             WebSocketMessageType.Text,
                             endOfMessage: true,
                             CancellationToken.None)

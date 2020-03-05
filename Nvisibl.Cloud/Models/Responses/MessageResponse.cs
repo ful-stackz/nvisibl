@@ -9,6 +9,6 @@ namespace Nvisibl.Cloud.Models.Responses
         public string Body { get; set; } = string.Empty;
         public int ChatroomId { get; set; }
         public int Id { get; set; }
-        public DateTime TimeSentUtc { get; set; }
+        public string TimeSentUtc { get; set; }
     }
 }

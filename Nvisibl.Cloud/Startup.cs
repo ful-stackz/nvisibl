@@ -20,6 +20,7 @@ using Nvisibl.Cloud.Authentication;
 using System.IdentityModel.Tokens.Jwt;
 using Nvisibl.Cloud.Services.Interfaces;
 using Nvisibl.Cloud.Services;
+using Nvisibl.Cloud.WebSockets;
 
 namespace Nvisibl.Cloud
 {
@@ -76,8 +77,8 @@ namespace Nvisibl.Cloud
 
             services.AddTransient<IUnitOfWork, UnitOfWork>();
             services.AddTransient<IUsersManager, UsersManager>();
-            services.AddTransient<IChatroomsManager, ChatroomsManager>();
             services.AddTransient<IMessagesManager, MessagesManager>();
+            services.AddTransient<IChatroomsManager, ChatroomsManager>();
 
             services.AddSingleton<INotificationsService, NotificationsService>();
             services.AddSingleton<IMessageParser, MessageParser>();
@@ -100,7 +101,12 @@ namespace Nvisibl.Cloud
 
             app.UseAuthorization();
 
-            app.UseWebSockets();
+            app.UseWebSockets(new WebSocketOptions
+            {
+                AllowedOrigins = { WebSocketConfig.AllowedOrigins },
+                KeepAliveInterval = WebSocketConfig.KeepAliveInterval,
+                ReceiveBufferSize = WebSocketConfig.ReceiveBufferSize,
+            });
 
             app.UseWebSocketsMiddleware();
 

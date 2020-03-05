@@ -56,7 +56,9 @@ namespace Nvisibl.Business
             });
             _ = await _unitOfWork.CompleteAsync();
 
-            return Mappers.ToChatroomModel(chatroom);
+            return Mappers.ToChatroomModel(
+                chatroom,
+                users: await _unitOfWork.GetRepository<IChatroomRepository>().GetAllChatroomUsers(chatroom.Id));
         }
 
         public async Task<ChatroomModel> GetChatroomAsync(int id)
@@ -77,7 +79,9 @@ namespace Nvisibl.Business
                 throw new InvalidOperationException($"Chatroom with id ({id}) does not exist.");
             }
 
-            return Mappers.ToChatroomModel(chatroom);
+            return Mappers.ToChatroomModel(
+                chatroom,
+                users: await _unitOfWork.GetRepository<IChatroomRepository>().GetAllChatroomUsers(chatroom.Id));
         }
 
         public async Task<IEnumerable<ChatroomModel>> GetChatroomsAsync(int page = 0, int pageSize = 10)
@@ -97,8 +101,20 @@ namespace Nvisibl.Business
                 throw new ArgumentOutOfRangeException(nameof(pageSize), pageSize, string.Empty);
             }
 
-            return (await _unitOfWork.GetRepository<IChatroomRepository>().GetRangeAsync(page, pageSize))
-                .Select(Mappers.ToChatroomModel)
+            var chatrooms = await _unitOfWork.GetRepository<IChatroomRepository>().GetRangeAsync(page, pageSize);
+            var chatroomsUsers = new Dictionary<int, List<User>>();
+            foreach (var chatroom in chatrooms)
+            {
+                chatroomsUsers.Add(
+                    key: chatroom.Id,
+                    value: (await _unitOfWork
+                        .GetRepository<IChatroomRepository>()
+                        .GetAllChatroomUsers(chatroom.Id))
+                        .ToList());
+            }
+
+            return chatrooms
+                .Select(chatroom => Mappers.ToChatroomModel(chatroom, chatroomsUsers[chatroom.Id]))
                 .ToList();
         }
 
@@ -161,9 +177,22 @@ namespace Nvisibl.Business
 
             await EnsureUserExistsAsync(userModel.Id);
 
-            return (await _unitOfWork.GetRepository<IChatroomRepository>()
-                .GetAllUserChatroomsAsync(new User { Id = userModel.Id, }))
-                .Select(Mappers.ToChatroomModel)
+            var chatrooms = await _unitOfWork
+                .GetRepository<IChatroomRepository>()
+                .GetAllUserChatroomsAsync(new User { Id = userModel.Id, });
+            var chatroomsUsers = new Dictionary<int, List<User>>();
+            foreach (var chatroom in chatrooms)
+            {
+                chatroomsUsers.Add(
+                    key: chatroom.Id,
+                    value: (await _unitOfWork
+                        .GetRepository<IChatroomRepository>()
+                        .GetAllChatroomUsers(chatroom.Id))
+                        .ToList());
+            }
+
+            return chatrooms
+                .Select(chatroom => Mappers.ToChatroomModel(chatroom, chatroomsUsers[chatroom.Id]))
                 .ToList();
         }
 

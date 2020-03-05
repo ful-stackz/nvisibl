@@ -5,16 +5,14 @@ namespace Nvisibl.Cloud.Models.Data
 {
     internal class FriendRequestNotification : Notification
     {
-        public FriendRequestNotification(int friendRequestId, bool accepted, UserModel sender, UserModel receiver)
+        public FriendRequestNotification(FriendModel friendRequest, UserModel sender, UserModel receiver)
         {
-            FriendRequestId = friendRequestId;
-            Accepted = accepted;
+            FriendRequest = friendRequest ?? throw new ArgumentNullException(nameof(friendRequest));
             Sender = sender ?? throw new ArgumentNullException(nameof(sender));
             Receiver = receiver ?? throw new ArgumentNullException(nameof(receiver));
         }
 
-        public int FriendRequestId { get; }
-        public bool Accepted { get; }
+        public FriendModel FriendRequest { get; }
         public UserModel Sender { get; }
         public UserModel Receiver { get; }
     }

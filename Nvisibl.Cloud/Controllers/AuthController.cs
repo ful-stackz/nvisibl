@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -20,9 +21,12 @@ namespace Nvisibl.Cloud.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
+        private const int LoginTokenDurationInMinutes = 5;
+        private const int LongTermTokenDurationInMinutes = 30;
+
         private readonly UserManager<IdentityUser> _identityUserManager;
         private readonly SignInManager<IdentityUser> _signInManager;
-        private readonly IUsersManager _chatUserManager;
+        private readonly IUsersManager _chatUsersManager;
         private readonly ILogger<AuthController> _logger;
 
         public AuthController(
@@ -33,7 +37,7 @@ namespace Nvisibl.Cloud.Controllers
         {
             _identityUserManager = identityUserManager ?? throw new ArgumentNullException(nameof(identityUserManager));
             _signInManager = signInManager ?? throw new ArgumentNullException(nameof(signInManager));
-            _chatUserManager = chatUserManager ?? throw new ArgumentNullException(nameof(chatUserManager));
+            _chatUsersManager = chatUserManager ?? throw new ArgumentNullException(nameof(chatUserManager));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
@@ -54,7 +58,7 @@ namespace Nvisibl.Cloud.Controllers
                     return BadRequest(identityRegistration.Errors.Select(e => e.Description));
                 }
 
-                var chatUser = await _chatUserManager.CreateUserAsync(new CreateUserModel
+                var chatUser = await _chatUsersManager.CreateUserAsync(new CreateUserModel
                 {
                     Username = request.Username,
                 });
@@ -66,10 +70,15 @@ namespace Nvisibl.Cloud.Controllers
 
                 return Ok();
             }
-            catch (Exception ex)
+            catch (ArgumentNullException ex)
             {
                 _logger.LogWarning(ex, "Registration failed.");
                 return BadRequest("Could not complete registration.");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Registration failed.");
+                return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }
 
@@ -96,7 +105,7 @@ namespace Nvisibl.Cloud.Controllers
                     return BadRequest();
                 }
 
-                var chatUser = await _chatUserManager.GetUserAsync(request.Username);
+                var chatUser = await _chatUsersManager.GetUserAsync(request.Username);
 
                 var jwtConfig = jwtConfiguration.GetSchemeConfig(JwtSchemes.User);
                 var jwtClaims = new Claim[]
@@ -109,7 +118,7 @@ namespace Nvisibl.Cloud.Controllers
                     algorithm: JwtConfiguration.SecurityAlgorithm
                 );
                 var createdAt = DateTime.UtcNow;
-                var validBefore = createdAt.AddMinutes(5);
+                var validBefore = createdAt.AddMinutes(LoginTokenDurationInMinutes);
                 var token = new JwtSecurityToken(
                     issuer: jwtConfig.Issuer,
                     audience: jwtConfig.Audience,
@@ -125,10 +134,18 @@ namespace Nvisibl.Cloud.Controllers
                         createdAt: createdAt.ToString("o"),
                         validBefore: validBefore.ToString("o"))));
             }
+            catch (Exception ex) when (
+                ex is ArgumentOutOfRangeException ||
+                ex is ArgumentNullException ||
+                ex is InvalidOperationException)
+            {
+                _logger.LogWarning(ex, "Could not complete login.");
+                return BadRequest();
+            }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, "Login failed.");
-                return BadRequest("Could not complete login.");
+                _logger.LogError(ex, "Login failed.");
+                return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }
 
@@ -160,7 +177,7 @@ namespace Nvisibl.Cloud.Controllers
                     algorithm: JwtConfiguration.SecurityAlgorithm
                 );
                 var createdAt = DateTime.UtcNow;
-                var validBefore = createdAt.AddMinutes(30);
+                var validBefore = createdAt.AddMinutes(LongTermTokenDurationInMinutes);
                 var token = new JwtSecurityToken(
                     issuer: jwtConfig.Issuer,
                     audience: jwtConfig.Audience,
@@ -174,10 +191,18 @@ namespace Nvisibl.Cloud.Controllers
                     createdAt: createdAt.ToString("o"),
                     validBefore: validBefore.ToString("o")));
             }
-            catch (Exception ex)
+            catch (Exception ex) when (
+                ex is ArgumentOutOfRangeException ||
+                ex is ArgumentNullException ||
+                ex is InvalidOperationException)
             {
                 _logger.LogWarning(ex, "Could not issue a renewed token.");
                 return BadRequest();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Could not issue a renewed token.");
+                return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }
     }

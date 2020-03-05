@@ -1,4 +1,5 @@
 ﻿using Nvisibl.Business.Interfaces;
+using Nvisibl.Business.Models.Users;
 using Nvisibl.Cloud.Models.Data;
 using Nvisibl.Cloud.Services.Interfaces;
 using Nvisibl.Cloud.WebSockets.Interfaces;
@@ -41,7 +42,7 @@ namespace Nvisibl.Cloud.WebSockets
             UserId = userId;
             SessionId = sessionId;
 
-            var chatrooms = chatroomsManager.GetUserChatroomsAsync(new Business.Models.Users.UserModel { Id = userId })
+            var chatrooms = chatroomsManager.GetUserChatroomsAsync(new UserModel { Id = userId })
                 .GetAwaiter()
                 .GetResult()
                 .Select(chatroom => chatroom.Id)
@@ -66,16 +67,16 @@ namespace Nvisibl.Cloud.WebSockets
                 notificationsService.Notifications
                 .Where(notification => notification is ChatroomChangedNotification)
                 .OfType<ChatroomChangedNotification>()
-                .Where(notification =>
-                    notification.Participants.Contains(userId) && !chatrooms.Contains(notification.ChatroomId))
-                .Subscribe(notification =>
+                .Select(notification => notification.Chatroom)
+                .Where(chatroom => chatroom.Users.Any(user => user.Id == userId) && !chatrooms.Contains(chatroom.Id))
+                .Subscribe(chatroom =>
                 {
-                    chatrooms.Add(notification.ChatroomId);
+                    chatrooms.Add(chatroom.Id);
                     webSocketSession.EnqueueMessage(new ChatroomInvitationMessage
                     {
-                        ChatroomId = notification.ChatroomId,
-                        ChatroomName = notification.ChatroomName,
-                        Users = notification.Participants,
+                        ChatroomId = chatroom.Id,
+                        ChatroomName = chatroom.Name,
+                        Users = chatroom.Users.Select(user => user.Id).ToList(),
                     });
                 }));
 
@@ -87,8 +88,8 @@ namespace Nvisibl.Cloud.WebSockets
                 .Subscribe(notification => webSocketSession.EnqueueMessage(
                     new FriendRequestMessage
                     {
-                        Accepted = notification.Accepted,
-                        Id = notification.FriendRequestId,
+                        Accepted = notification.FriendRequest.Accepted,
+                        Id = notification.FriendRequest.Id,
                         ReceiverId = notification.Receiver.Id,
                         ReceiverUsername = notification.Receiver.Username,
                         SenderId = notification.Sender.Id,

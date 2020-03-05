@@ -1,20 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using Nvisibl.Business.Models.Chatrooms;
+using System;
 
 namespace Nvisibl.Cloud.Models.Data
 {
     internal class ChatroomChangedNotification : Notification
     {
-        public ChatroomChangedNotification(int chatroomId, string chatroomName, IEnumerable<int> participants)
+        public ChatroomChangedNotification(ChatroomModel chatroom)
         {
-            ChatroomId = chatroomId;
-            ChatroomName = chatroomName;
-            Participants = participants?.ToList() ?? throw new ArgumentNullException(nameof(participants));
+            Chatroom = chatroom ?? throw new ArgumentNullException(nameof(chatroom));
         }
 
-        public int ChatroomId { get; }
-        public string ChatroomName { get; }
-        public IList<int> Participants { get; }
+        public ChatroomModel Chatroom { get; }
     }
 }

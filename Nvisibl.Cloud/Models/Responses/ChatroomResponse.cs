@@ -8,6 +8,7 @@ namespace Nvisibl.Cloud.Models.Responses
         public int Id { get; set; }
         public string Name { get; set; } = string.Empty;
         public bool IsShared { get; set; }
+        public IList<MessageResponse> Messages { get; set; } = Array.Empty<MessageResponse>();
         public IList<BasicUserResponse> Users { get; set; } = Array.Empty<BasicUserResponse>();
     }
 }
